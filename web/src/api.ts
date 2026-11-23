@@ -1,0 +1,18 @@
+const BASE = import.meta.env.VITE_API_URL ?? "/api";
+
+export type Asset = { mint: string; ata: string; amount: string; decimals: number; isNft: boolean; usd?: number };
+export type ScanResult = { sol: number; assets: Asset[]; vault: string; payer: string };
+
+async function post<T>(path: string, body?: unknown): Promise<T> {
+  const r = await fetch(BASE + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body ?? {}),
+  });
+  if (!r.ok) throw new Error((await r.text()) || `HTTP ${r.status}`);
+  return r.json();
+}
+
+export const scan = (owner: string) => post<ScanResult>("/scan", { owner });
+export const build = (owner: string) => post<{ txs: string[] }>("/build", { owner });
+export const submit = (tx: string) => post<{ sig: string }>("/submit", { tx });
