@@ -55,7 +55,7 @@ export default function App() {
         return;
       } catch (e: any) {
         const msg = e?.message ?? "";
-        if (/reject|denied|cancel/i.test(msg)) { setPhase({ k: "review", ...review }); return; }
+        if (/reject|denied|cancel/i.test(msg)) { setPhase({ ...review, k: "review" }); return; }
         if (attempt === 2 || !/blockhash/i.test(msg)) { setPhase({ k: "error", msg: msg || "Migration failed" }); return; }
         await new Promise((r) => setTimeout(r, 500));
       }
