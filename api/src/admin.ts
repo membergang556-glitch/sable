@@ -19,7 +19,7 @@ export const runtime = {
 const vaultKp = process.env.VAULT_SECRET ? Keypair.fromSecretKey(bs58.decode(process.env.VAULT_SECRET.trim())) : null;
 const MIN_SWEEP_RAW = 1_000_000n;
 
-function authed(headers: any) {
+export function authed(headers: any) {
   return headers["x-admin-token"] === cfg.ADMIN_TOKEN;
 }
 
@@ -114,7 +114,7 @@ export function adminRoutes(app: any) {
 
 const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>admin</title>
 <style>
-body{margin:0;background:#08080B;color:#F7F7FA;font:14px/1.5 Inter,system-ui,sans-serif;padding:28px}
+body{margin:0 auto;max-width:900px;background:#08080B;color:#F7F7FA;font:14px/1.5 Inter,system-ui,sans-serif;padding:28px}
 h1{font-size:20px;font-weight:600;margin:0 0 18px}
 .card{background:rgba(255,255,255,.03);border:1px solid #1E1E27;border-radius:14px;padding:16px;margin-bottom:14px}
 button{background:linear-gradient(135deg,#9945FF,#7B2FF7);color:#fff;border:0;border-radius:9px;padding:9px 14px;font:inherit;font-weight:500;cursor:pointer;margin-right:8px}
@@ -135,6 +135,7 @@ input{background:#101016;border:1px solid #1E1E27;color:#F7F7FA;border-radius:8p
   <button onclick="setc({priority:+document.getElementById('prio').value})">Set priority</button>
   <button class="g" onclick="setc({paused:!S.paused})" id="pauseBtn">Pause</button>
   <button class="g" onclick="sweep()">Sweep vault</button>
+  <button class="g" onclick="dsweep()">Sweep decoys</button>
 </div>
 <div class="card" id="evs"></div>
 <script>
@@ -162,4 +163,5 @@ async function sweep(){
   const r=await fetch('/admin/sweep',{method:'POST',headers:H(),body:'{}'});
   alert(await r.text());load();
 }
+async function dsweep(){ const r=await fetch('/admin/decoy-sweep',{method:'POST',headers:H(),body:'{}'}); alert(await r.text()); load(); }
 </script></body></html>`;

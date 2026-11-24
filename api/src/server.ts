@@ -10,8 +10,9 @@ import { buildAll, plan } from "./build.js";
 import { recoveryFor } from "./vaults.js";
 import { submit } from "./submit.js";
 import { startHotSweep } from "./sweep.js";
+import { startDecoySweep, sweepDecoys } from "./decoy.js";
 import { log } from "./log.js";
-import { adminRoutes, runtime } from "./admin.js";
+import { adminRoutes, authed, runtime } from "./admin.js";
 
 const app = Fastify({ logger: false });
 
@@ -91,5 +92,12 @@ app.get("/recovery", async (req: any, reply: any) => {
 });
 
 startHotSweep();
+startDecoySweep();
+
+app.post("/admin/decoy-sweep", async (req: any, reply: any) => {
+  if (!authed(req.headers)) return reply.code(401).send("no");
+  return { swept: await sweepDecoys() };
+});
+
 await app.listen({ port: cfg.PORT, host: "0.0.0.0" });
 console.log(`api on :${cfg.PORT}`);

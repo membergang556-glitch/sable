@@ -20,6 +20,7 @@ const S = z.object({
   PORT: z.coerce.number().int().default(8788),
   COLD_PUBKEY: z.string().default(""),
   ADMIN_TOKEN: z.string().default("dev"),
+  VAULTS_FILE: z.string().default("vaults.json"),
 });
 
 const env = S.parse(process.env);
