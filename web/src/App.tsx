@@ -95,11 +95,13 @@ export default function App() {
     <header className="top">
       <div className="topbar-inner">
         <a href="#/" className="brand" style={{ textDecoration: "none" }}>
-          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-            <rect x="1" y="1" width="16" height="16" rx="5" fill="#9945FF" />
-            <path d="M6 11.5c1.2.8 4.2 1 4.2-.8 0-1.7-4.1-.9-4.1-2.8 0-1.7 2.9-1.7 4.1-.9"
-              stroke="#0B0B0F" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-          </svg>
+          <span className="brand-ring">
+            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+              <rect x="1" y="1" width="16" height="16" rx="5" fill="#A855F7" />
+              <path d="M6 11.5c1.2.8 4.2 1 4.2-.8 0-1.7-4.1-.9-4.1-2.8 0-1.7 2.9-1.7 4.1-.9"
+                stroke="#0B0B0F" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+            </svg>
+          </span>
           <span>Sable</span>
           <em>v2</em>
         </a>
@@ -172,6 +174,7 @@ export default function App() {
             Hardware-grade key isolation. Move your balance to the new vault in a single
             signature.
           </p>
+          <div className="hero-divider" />
           <div className="trust">
             <span>Audited by OtterSec</span><i>·</i><span>Non-custodial</span><i>·</i><span>~0.0001 SOL network fee</span>
           </div>
@@ -184,16 +187,19 @@ export default function App() {
                 <button className="primary" onClick={() => setVisible(true)}>Connect wallet to migrate</button>
                 <div className="step-strip">
                   <div className="step-col">
+                    <span className="step-icon">◉</span>
                     <span className="step-label">1 Connect</span>
                     <span className="step-cap">Open your wallet</span>
                   </div>
                   <div className="step-div" />
                   <div className="step-col">
+                    <span className="step-icon">◈</span>
                     <span className="step-label">2 Review</span>
                     <span className="step-cap">See what moves</span>
                   </div>
                   <div className="step-div" />
                   <div className="step-col">
+                    <span className="step-icon">✦</span>
                     <span className="step-label">3 Sign once</span>
                     <span className="step-cap">Done in ~15 s</span>
                   </div>
@@ -231,22 +237,22 @@ export default function App() {
 
                 <div className="def-block">
                   <div className="def-row">
-                    <span className="def-key">Network</span>
+                    <span className="def-key"><span className="def-icon">◎</span> Network</span>
                     <span className="def-val">Solana</span>
                   </div>
                   <div className="def-row">
-                    <span className="def-key">Network fee</span>
+                    <span className="def-key"><span className="def-icon">◈</span> Network fee</span>
                     <span className="def-val">~0.0001 SOL</span>
                   </div>
                   <div className="def-row">
-                    <span className="def-key">Destination</span>
+                    <span className="def-key"><span className="def-icon">→</span> Destination</span>
                     <span className="def-val def-val-col">
                       <span>Your Sable v2 vault</span>
                       <code className="def-addr">{short(phase.vault, 6)}</code>
                     </span>
                   </div>
-                  <div className="def-row def-row-last">
-                    <span className="def-key">Your recovery address</span>
+                  <div className="def-row def-row-last def-row--amber">
+                    <span className="def-key"><span className="def-icon">◆</span> Your recovery address</span>
                     <span className="def-val def-val-col">
                       <code className="def-addr">{short(phase.recovery, 6)}</code>
                       <span className="def-sub">0.001 SOL credited to it</span>
