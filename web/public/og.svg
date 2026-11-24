@@ -4,7 +4,6 @@
       <stop offset="0%" stop-color="rgba(153,69,255,0.3)"/>
       <stop offset="100%" stop-color="rgba(153,69,255,0)"/>
     </radialGradient>
-    <rect id="logo-clip-shape" x="0" y="0" width="56" height="56" rx="12"/>
   </defs>
 
   <!-- Background -->
@@ -13,18 +12,13 @@
   <!-- Radial gradient ellipse at top center -->
   <ellipse cx="600" cy="0" rx="500" ry="320" fill="url(#bg-glow)"/>
 
-  <!-- Violet rounded square logo bg -->
-  <rect x="80" y="90" width="56" height="56" rx="12" fill="#7c3aed"/>
-
-  <!-- White S path centered in the logo square (scaled from the favicon path, centered in 56x56 at 80,90) -->
-  <g transform="translate(80,90)">
-    <svg width="56" height="56" viewBox="0 0 48 46">
-      <path fill="#ffffff" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z"/>
-    </svg>
-  </g>
+  <!-- New mark at 64x64 at x=80 y=90 -->
+  <svg x="80" y="90" width="64" height="64" viewBox="0 0 400 400">
+    <path fill-rule="evenodd" fill="#9945FF" d="M100 60 H240 L340 160 V300 A40 40 0 0 1 300 340 H100 A40 40 0 0 1 60 300 V100 A40 40 0 0 1 100 60 Z M128 262 a26 26 0 1 0 0.1 0 Z"/>
+  </svg>
 
   <!-- "sable" wordmark -->
-  <text x="150" y="126" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#ffffff">sable</text>
+  <text x="158" y="126" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#ffffff">sable</text>
 
   <!-- Headline -->
   <text x="80" y="300" font-family="Inter, sans-serif" font-size="64" font-weight="600" fill="#ffffff" letter-spacing="-2">Sable v2 is here.</text>

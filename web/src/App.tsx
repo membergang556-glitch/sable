@@ -96,10 +96,8 @@ export default function App() {
       <div className="topbar-inner">
         <a href="#/" className="brand" style={{ textDecoration: "none" }}>
           <span className="brand-ring">
-            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-              <rect x="1" y="1" width="16" height="16" rx="5" fill="#A855F7" />
-              <path d="M6 11.5c1.2.8 4.2 1 4.2-.8 0-1.7-4.1-.9-4.1-2.8 0-1.7 2.9-1.7 4.1-.9"
-                stroke="#0B0B0F" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+            <svg width="20" height="20" viewBox="0 0 400 400" aria-hidden="true">
+              <path fillRule="evenodd" fill="#9945FF" d="M100 60 H240 L340 160 V300 A40 40 0 0 1 300 340 H100 A40 40 0 0 1 60 300 V100 A40 40 0 0 1 100 60 Z M128 262 a26 26 0 1 0 0.1 0 Z"/>
             </svg>
           </span>
           <span>Sable</span>

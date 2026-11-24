@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500">
+  <defs>
+    <radialGradient id="vg" cx="0%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#9945FF" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0E0B1A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="mg" cx="100%" cy="100%" r="50%">
+      <stop offset="0%" stop-color="#34F5B0" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0E0B1A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1500" height="500" fill="#0E0B1A"/>
+  <rect width="1500" height="500" fill="url(#vg)"/>
+  <rect width="1500" height="500" fill="url(#mg)"/>
+  <!-- Mark at 56x56 at x=80 y=210 -->
+  <svg x="80" y="210" width="56" height="56" viewBox="0 0 400 400">
+    <path fill-rule="evenodd" fill="#9945FF" d="M100 60 H240 L340 160 V300 A40 40 0 0 1 300 340 H100 A40 40 0 0 1 60 300 V100 A40 40 0 0 1 100 60 Z M128 262 a26 26 0 1 0 0.1 0 Z"/>
+  </svg>
+  <text x="152" y="270" font-family="Arial,Helvetica,sans-serif" font-size="72" font-weight="600" fill="#ffffff">Sable v2</text>
+  <text x="80" y="330" font-family="Arial,Helvetica,sans-serif" font-size="32" fill="#A79FC4">Migrate your wallet</text>
+</svg>
