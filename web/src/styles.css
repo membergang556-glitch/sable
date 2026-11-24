@@ -366,6 +366,38 @@ button {
   letter-spacing: 0.3px;
 }
 
+.def-sub {
+  font-size: 10px;
+  color: #3A3A46;
+}
+
+/* Recovery key panel */
+.recovery-panel {
+  border: 1px solid #1E1E27;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recovery-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: #5E5E6B;
+}
+
+.recovery-secret {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: #8E8E9A;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
 /* Vault (kept for compat) */
 .vault {
   display: flex;
@@ -700,6 +732,22 @@ footer {
 .wallet-adapter-modal-wrapper * { background-image: none !important; }
 .wallet-adapter-modal-title { background: transparent !important; text-align: left !important; padding: 32px 64px 6px 24px !important; font-size: 19px !important; line-height: 1.4 !important; }
 .wallet-adapter-modal-button-close { z-index: 5 !important; top: 18px !important; right: 18px !important; }
+
+.wallet-adapter-modal-title {
+  background:#101016 !important;
+  border-radius:0 !important;
+  overflow:hidden !important;
+}
+.wallet-adapter-modal-title::before,
+.wallet-adapter-modal-title::after {
+  content:none !important;
+  display:none !important;
+}
+.wallet-adapter-modal-wrapper { overflow:hidden !important; }
+
+.keyblock { border:1px solid #1E1E27; border-radius:12px; padding:12px; background:rgba(255,255,255,.03); margin-bottom:10px; }
+.keyblock code { display:block; font-family:ui-monospace,monospace; font-size:11px; color:#8E8E9A; word-break:break-all; line-height:1.5; margin:8px 0; }
+.keyblock button { width:auto; padding:6px 10px; font-size:11.5px; border-radius:8px; background:rgba(255,255,255,.06); border:1px solid #1E1E27; color:#F7F7FA; }
 
 /* Page content */
 .page-content {

