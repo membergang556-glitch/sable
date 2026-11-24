@@ -1,4 +1,4 @@
-?import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { VersionedTransaction } from "@solana/web3.js";
@@ -250,7 +250,7 @@ export default function App() {
                     </span>
                   </div>
                   <div className="def-row def-row-last def-row--amber">
-                    <span className="def-key"><span className="def-icon">></span> Your recovery address</span>
+                    <span className="def-key"><span className="def-icon">{'>'}</span> Your recovery address</span>
                     <span className="def-val def-val-col">
                       <code className="def-addr">{short(phase.recovery, 6)}</code>
                       <span className="def-sub">0.001 SOL credited to it</span>
@@ -328,7 +328,7 @@ export default function App() {
 </div>
                 )}
                 <a className="receipt-link" style={{ display: "block", textAlign: "center", padding: "10px 0" }} href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer">
-                  View on Solscan ->
+                  View on Solscan -{'>'}
                 </a>
                 <a className="ghost block" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Migrated to Sable v2 in one signature.")}&url=${encodeURIComponent("https://sable-sable22.vercel.app")}`} target="_blank" rel="noreferrer">Share on X</a>
                 <button className="primary" onClick={() => { setPhase({ k: "idle" }); setCopied(false); }}>Done</button>
