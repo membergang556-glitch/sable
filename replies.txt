@@ -1,0 +1,29 @@
+﻿Revoke the approvals first, that's what they actually use.
+Don't reuse that wallet. Fresh one, move what's left.
+Check approvals before anything else. Live ones are how they come back.
+Revoke everything, then retire the wallet entirely.
+That's why approvals matter more than seed phrases.
+Solflare or Backpack, both fine.
+Backpack. Keys stay on your device.
+Anything non-custodial. Exchange apps are IOUs.
+Two wallets beats one. One mistake doesn't take everything.
+Start with $20 and practice before real size.
+Learn what an approval is before you sign anything.
+Ignore every DM. All of them.
+Write the seed phrase on paper. Never type it into a site.
+Verify the address on the device, not the clipboard.
+Do it in chunks. First transfer is always a test.
+Send to a wallet you control, then delete the exchange address.
+Real claims cost a fee, not a deposit.
+If it asks you to send tokens to receive tokens, walk.
+No real airdrop needs your seed phrase.
+Check the official account first. Half the replies under those are fake.
+Find the claim link on the project's site, not a DM.
+If it asks you to sign a transfer, read what's moving.
+Simulate it first if your wallet lets you.
+Small balances first. Test, then move the rest.
+Revoke, move, retire. In that order.
+Happy to name the one I use if it helps.
+There's a wallet that does this in one signature, can point you at it.
+The shortlist is short, want it?
+What are you using now?

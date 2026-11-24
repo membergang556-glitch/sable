@@ -1,0 +1,3 @@
+migrated a wallet in one signature today. took about 15 seconds and cost a fraction of a cent
+the whole point is you don't have to remember twelve steps. connect, sign once, done
+your vault gets a recovery key, not an account. nothing to log into, nothing held on our side
