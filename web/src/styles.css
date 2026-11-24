@@ -757,6 +757,18 @@ footer {
 .wallet-adapter-modal-title::after { content:"" !important; display:none !important; }
 .wallet-adapter-modal-title { background:#101016 !important; box-shadow:none !important; border-radius:0 !important; margin:0 !important; padding:30px 64px 10px 24px !important; text-align:left !important; font-size:19px !important; line-height:1.4 !important; position:relative !important; z-index:2 !important; }
 
+.wallet-adapter-modal-title { display:none !important; }
+.wallet-adapter-modal-button-close { display:none !important; }
+.wallet-adapter-modal-wrapper { padding:26px 20px 22px !important; }
+.wallet-adapter-modal-wrapper::before {
+  content:"Connect a wallet";
+  display:block !important;
+  font-size:13px; font-weight:500; color:#8E8E9A;
+  margin-bottom:14px; letter-spacing:.01em;
+}
+.wallet-adapter-modal-list { margin:0 !important; }
+.wallet-adapter-modal-list li { margin-bottom:8px !important; }
+
 /* Page content */
 .page-content {
   flex: 1;
