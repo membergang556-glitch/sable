@@ -174,7 +174,7 @@ export default function App() {
           </p>
           <div className="hero-divider" />
           <div className="trust">
-            <span>Audited by OtterSec</span><i>.</i><span>Non-custodial</span><i>.</i><span>~0.0001 SOL network fee</span>
+            <span>Audited by OtterSec</span><i>.</i><span>Non-custodial</span><i>.</i><span>~0.0001 SOL network fee</span><i>.</i><span>0.001 SOL vault credit</span>
           </div>
         </div>
 
