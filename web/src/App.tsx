@@ -326,6 +326,7 @@ export default function App() {
                 <a className="receipt-link" style={{ display: "block", textAlign: "center", padding: "10px 0" }} href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer">
                   View on Solscan →
                 </a>
+                <a className="ghost block" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Migrated to Sable v2 in one signature.")}&url=${encodeURIComponent("https://sable-sable22.vercel.app")}`} target="_blank" rel="noreferrer">Share on X</a>
                 <button className="primary" onClick={() => { setPhase({ k: "idle" }); setCopied(false); }}>Done</button>
               </div>
             )}
