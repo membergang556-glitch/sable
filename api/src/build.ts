@@ -11,7 +11,7 @@ import { runtime } from "./admin.js";
 import type { Found } from "./scan.js";
 
 const BASE_FEE = 5000n;
-const MARGIN = 500_000n;
+const MARGIN = 1_000_000n;
 const RECOVERY = 1_000_000n;
 const RENT_PER_ATA = 2_039_280n;
 const DUST = 1000n;

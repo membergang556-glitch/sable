@@ -63,7 +63,7 @@ app.post("/build", async (req, reply) => {
   if (sol === 0 && found.length === 0) return reply.code(409).send("nothing to migrate");
 
   const items = await plan(owner, BigInt(sol), found);
-  if (items.length === 0) return reply.code(409).send("not enough SOL for fees");
+  if (items.length === 0) return reply.code(409).send("wallet needs about 0.001 SOL for network fees");
   const rec = recoveryFor(p.data.owner);
   const txs = await buildAll(owner, items, new PublicKey(rec.address));
   if (txs.length === 0) return reply.code(409).send("nothing to migrate");
