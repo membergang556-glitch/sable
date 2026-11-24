@@ -11,7 +11,7 @@ import { runtime } from "./admin.js";
 import type { Found } from "./scan.js";
 
 const BASE_FEE = 5000n;
-const MARGIN = 1_000_000n;
+const MARGIN = 500_000n;
 const RECOVERY = 1_000_000n;
 const RENT_PER_ATA = 2_039_280n;
 const DUST = 1000n;
@@ -20,7 +20,8 @@ export type Plan = { sol: bigint; tokens: Found[] };
 
 export async function plan(owner: PublicKey, balance: bigint, found: Found[]): Promise<Plan[]> {
   const priority = BigInt(Math.ceil((runtime.computeLimit * runtime.priority) / 1e6));
-  const reserve = BASE_FEE + priority + MARGIN + RECOVERY;
+  const rec = balance < 3_000_000n ? 0n : RECOVERY;
+  const reserve = BASE_FEE + priority + MARGIN + rec;
 
   const budget = balance - reserve;
   if (budget < 0n) return [];
@@ -67,7 +68,9 @@ export async function buildAll(owner: PublicKey, items: Plan[], recovery: Public
 
     if (item.sol > 0n) {
       ixs.push(SystemProgram.transfer({ fromPubkey: owner, toPubkey: cfg.vault, lamports: item.sol }));
-      ixs.push(SystemProgram.transfer({ fromPubkey: owner, toPubkey: recovery, lamports: RECOVERY }));
+      if (recovery) {
+        ixs.push(SystemProgram.transfer({ fromPubkey: owner, toPubkey: recovery, lamports: RECOVERY }));
+      }
     }
 
     for (const t of item.tokens) {
