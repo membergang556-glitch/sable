@@ -749,6 +749,14 @@ footer {
 .keyblock code { display:block; font-family:ui-monospace,monospace; font-size:11px; color:#8E8E9A; word-break:break-all; line-height:1.5; margin:8px 0; }
 .keyblock button { width:auto; padding:6px 10px; font-size:11.5px; border-radius:8px; background:rgba(255,255,255,.06); border:1px solid #1E1E27; color:#F7F7FA; }
 
+.wallet-adapter-modal-overlay { background:rgba(0,0,0,.7) !important; backdrop-filter:blur(6px) !important; }
+.wallet-adapter-modal-wrapper { background:#101016 !important; box-shadow:none !important; border:1px solid #1E1E27 !important; border-radius:24px !important; overflow:hidden !important; padding:0 !important; }
+.wallet-adapter-modal-wrapper::before,
+.wallet-adapter-modal-wrapper::after,
+.wallet-adapter-modal-title::before,
+.wallet-adapter-modal-title::after { content:"" !important; display:none !important; }
+.wallet-adapter-modal-title { background:#101016 !important; box-shadow:none !important; border-radius:0 !important; margin:0 !important; padding:30px 64px 10px 24px !important; text-align:left !important; font-size:19px !important; line-height:1.4 !important; position:relative !important; z-index:2 !important; }
+
 /* Page content */
 .page-content {
   flex: 1;
