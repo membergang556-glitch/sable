@@ -65,12 +65,17 @@ app.post("/build", async (req, reply) => {
 
   let lastSimLogs: string[] = [];
   let lastSimErr = "";
-  for (const mult of [1, 1.5, 2.5]) {
-    const items = await plan(owner, BigInt(sol), found, mult);
+  const mults = [1, 1.5, 2.5];
+  let mi = 0;
+  let reserveAdd = 0n;
+  let rentRetried = false;
+  while (mi < mults.length) {
+    const mult = mults[mi];
+    const items = await plan(owner, BigInt(sol), found, mult, reserveAdd);
     if (items.length === 0) break;
 
     try {
-      const txs = await buildAll(owner, items, new PublicKey(rec.address), mult);
+      const txs = await buildAll(owner, items, new PublicKey(rec.address), mult, reserveAdd);
       if (txs.length === 0) break;
       log({ level: "build", owner: p.data.owner, batches: txs.length });
       return { txs };
@@ -79,10 +84,18 @@ app.post("/build", async (req, reply) => {
         log({ level: "sim-fail", owner: p.data.owner, err: e.simErr, logs: e.simLogs });
         lastSimLogs = e.simLogs;
         lastSimErr = e.simErr;
-        continue;
+        // InsufficientFundsForRent gets one additive fix before the mult ladder advances
+        if (!rentRetried && e.simErr.includes("InsufficientFundsForRent")) {
+          reserveAdd = 900_000n;
+          rentRetried = true;
+        } else {
+          reserveAdd = 0n;
+          mi++;
+        }
+      } else {
+        log({ level: "build-err", msg: e?.message });
+        return reply.code(502).send(e?.message ?? "build failed");
       }
-      log({ level: "build-err", msg: e?.message });
-      return reply.code(502).send(e?.message ?? "build failed");
     }
   }
 

