@@ -745,6 +745,27 @@ footer {
   color: #3A2D55;
 }
 
+.footer-socials-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.footer-socials-btn {
+  background: transparent;
+  border: 1px solid rgba(168, 85, 247, 0.16);
+  border-radius: 9px;
+  color: #6E6486;
+  font-size: 12.5px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+
+.footer-socials-btn:hover { border-color: rgba(168, 85, 247, 0.28); color: #A79FC4; }
+
 .muted { color: #6E6486; }
 .sm    { font-size: 12px; }
 .xs    { font-size: 10.5px; color: #6E6486; }
