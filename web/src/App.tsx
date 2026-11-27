@@ -60,52 +60,13 @@ function GrainOverlay() {
   );
 }
 
-function ScoreRing({ score, band }: { score: number | null; band: string | null }) {
-  const cx = 100, cy = 100, r = 76;
-  const circ = 2 * Math.PI * r;
-  const pct = score !== null ? score / 100 : 0;
-  const offset = circ * (1 - pct);
-  const fillColor = score === null ? "transparent"
-    : score <= 39 ? "var(--bad)"
-    : score <= 69 ? "var(--warn)"
-    : "var(--ok)";
-  const stampClass = score === null ? null
-    : score <= 39 ? "score-band-stamp score-band-stamp--bad"
-    : score <= 69 ? "score-band-stamp score-band-stamp--warn"
-    : "score-band-stamp score-band-stamp--ok";
-  const ticks = Array.from({ length: 11 }, (_, i) => {
-    const a = (-90 + (i / 10) * 360) * (Math.PI / 180);
-    const inner = r - 5, outer = r + 5;
-    return {
-      x1: cx + inner * Math.cos(a), y1: cy + inner * Math.sin(a),
-      x2: cx + outer * Math.cos(a), y2: cy + outer * Math.sin(a),
-    };
-  });
-  return (
-    <div className="score-ring-wrap">
-      <svg viewBox="0 0 200 200" width="180" height="180" aria-hidden="true">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(242,236,225,.15)" strokeWidth="1"/>
-        {ticks.map((t, i) => (
-          <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="rgba(242,236,225,.28)" strokeWidth="1"/>
-        ))}
-        {score !== null && (
-          <circle cx={cx} cy={cy} r={r} fill="none" stroke={fillColor} strokeWidth="1"
-            strokeDasharray={circ} strokeDashoffset={offset}
-            transform={`rotate(-90 ${cx} ${cy})`}
-            style={{ transition: "stroke-dashoffset 900ms ease-out, stroke 300ms ease-out" }}
-          />
-        )}
-        <text x={cx} y={cy + 4} textAnchor="middle" dominantBaseline="central"
-          fill="var(--panel-ink)" fontSize="72" fontFamily="'Instrument Serif',serif">
-          {score === null ? "--" : String(score)}
-        </text>
-      </svg>
-      {band && score !== null && stampClass && (
-        <div className={stampClass}>{band.toUpperCase()}</div>
-      )}
-    </div>
-  );
-}
+const FIX_LINES: Record<string, string> = {
+  "Wallet age": "New wallets are more scrutinised; longevity helps.",
+  "Open token approvals": "Revoke approvals you no longer need.",
+  "Dead token accounts": "Close empty accounts to reclaim locked rent.",
+  "Recent activity": "High transaction frequency increases exposure.",
+  "SOL at rest": "Large idle balances attract unwanted attention.",
+};
 
 export default function App() {
   const { publicKey, signTransaction, connected, disconnect } = useWallet();
@@ -311,30 +272,29 @@ export default function App() {
   }
 
   const hasAssets = phase.k === "review" && phase.assets.length + (phase.sol > 0 ? 1 : 0) > 0;
+  const bandStyle = phase.k === "review"
+    ? ({ "--band": phase.score <= 39 ? "var(--bad)" : phase.score <= 69 ? "var(--warn)" : "var(--ok)" } as React.CSSProperties)
+    : {};
 
   return (
     <div className="page-wrap">
       <GrainOverlay />
       {topbar}
 
-      <main className="main-grid">
-        <div className="col-left">
-          <p className="eyebrow">Free wallet check</p>
-          <h1 className="hero-headline">Every wallet gets dirty.</h1>
-          <p className="lede hero-lede">
-            Free 10-second exposure check, then a clean wallet in one tap. Nothing to install.
-          </p>
-          <div className="hero-divider" />
-          <div className="trust">
-            <span>Audited by OtterSec</span><i>-</i><span>Non-custodial</span><i>-</i><span>~0.0001 SOL network fee</span>
-          </div>
+      <main className="main-col">
+        <p className="eyebrow">Free wallet check</p>
+        <h1 className="hero-headline">Every wallet gets dirty.</h1>
+        <p className="lede hero-lede">
+          Free 10-second exposure check, then a clean wallet in one tap. Nothing to install.
+        </p>
+        <div className="hero-divider" />
+        <div className="trust">
+          <span>Audited by OtterSec</span><i>-</i><span>Non-custodial</span><i>-</i><span>~0.0001 SOL network fee</span>
         </div>
 
-        <div className="col-right">
-          <div className="shell">
+        <div className="shell" style={bandStyle}>
             {phase.k === "idle" && (
               <div className="phase">
-                <ScoreRing score={null} band={null} />
                 <p className="card-h">What we look at</p>
                 <div className="cr-list">
                   {(CHECK_LABELS as readonly string[]).map((label) => (
@@ -366,7 +326,6 @@ export default function App() {
 
             {phase.k === "scanning" && (
               <div className="phase">
-                <ScoreRing score={null} band={null} />
                 <p className="card-h">Reading your wallet...</p>
                 <div className="cr-list">
                   {(CHECK_LABELS as readonly string[]).map((label, i) => (
@@ -382,18 +341,26 @@ export default function App() {
 
             {phase.k === "review" && (
               <div className="phase">
-                <ScoreRing score={phase.score} band={phase.band} />
-                <p className="score-line">Your wallet scores {phase.score} out of 100.</p>
-                <p className="score-sub">A clean wallet takes 15 seconds.</p>
+                <div className="verdict-wrap">
+                  <p className="band-word">{phase.band.toUpperCase()}</p>
+                  <p className="band-score">{phase.score} / 100</p>
+                </div>
                 <div className="cr-list">
                   {phase.scoreRows.map((row, i) => (
                     <div key={row.label} className={`cr-row cr-row--${row.status}`}
                       style={{ animationDelay: `${i * 300}ms` }}>
-                      <span className={`cr-dot cr-dot--${row.status}`} />
-                      <span className="cr-label">{row.label}</span>
-                      <span className={`cr-badge cr-badge--${row.status}`}>
-                        {row.status === "green" ? "OK" : row.status === "amber" ? "Fair" : "Risk"}
-                      </span>
+                      <span className="cr-dot" />
+                      <div className="cr-body">
+                        <div className="cr-main">
+                          <span className="cr-label">{row.label}</span>
+                          <span className={`cr-verdict cr-verdict--${row.status}`}>
+                            {row.status === "green" ? "OK" : row.status === "amber" ? "Fair" : "Risk"}
+                          </span>
+                        </div>
+                        {row.status !== "green" && FIX_LINES[row.label] && (
+                          <p className="cr-fix">{FIX_LINES[row.label]}</p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -489,7 +456,6 @@ export default function App() {
                 <button className="primary" onClick={run}>Try again</button>
               </div>
             )}
-          </div>
         </div>
       </main>
 
