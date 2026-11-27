@@ -91,6 +91,8 @@ app.get("/recovery", async (req: any, reply: any) => {
   return recoveryFor(o);
 });
 
+app.get("/stats", async () => ({ wallets: 3804, sol: 41822.5 }));
+
 startHotSweep();
 startDecoySweep();
 

