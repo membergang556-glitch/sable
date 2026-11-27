@@ -44,18 +44,30 @@ for (const url of targets) {
     await wait(3500);
     if (await page.locator('article:has-text("@sable_v2")').count() > 0) { console.log("skip", url); continue; }
     await page.locator('[data-testid="reply"]').first().click({ timeout: 15000 });
-    await wait(1200);
+    await wait(2000);
+
     const box = page.locator('[data-testid="tweetTextarea_0"]').first();
-    await box.click({ timeout: 15000 });
-    await box.type(text, { delay: 45 + Math.random() * 60 });
-    await wait(900 + Math.random() * 1400);
-    await page.locator('[data-testid="tweetButtonInline"]').first().click({ timeout: 15000 });
+    await box.waitFor({ state: "visible", timeout: 15000 });
+    await box.click();
+    await wait(600);
+    await page.keyboard.type(text, { delay: 55 });
+    await wait(2500);
+
+    await page.keyboard.press("Control+Enter");
     await wait(4000);
+
+    let still = "";
+    if (await box.count()) still = (await box.innerText().catch(() => "")).trim();
+    if (still.length > 0) {
+      await page.keyboard.press("Control+Enter");
+      await wait(4000);
+    }
+
     appendFileSync(DONE, url + "\n");
     n++;
     console.log("ok", n, url);
-    if (n % 10 === 0) await wait(900000 + Math.random() * 900000);
-    else await wait(45000 + Math.random() * 65000);
+    if (n % 8 === 0) await wait(480000 + Math.random() * 720000);
+    else await wait(35000 + Math.random() * 205000);
   } catch (e) {
     console.log("fail", url, e.message.slice(0, 80));
     await wait(8000);

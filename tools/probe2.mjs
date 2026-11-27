@@ -1,0 +1,14 @@
+﻿import { chromium } from "playwright";
+import { homedir } from "node:os";
+import { join } from "node:path";
+const ctx = await chromium.launchPersistentContext(join(homedir(), "xprofile"), { headless: false });
+const page = ctx.pages()[0] ?? (await ctx.newPage());
+await page.goto("https://x.com/sable_v2/following", { waitUntil: "domcontentloaded" });
+await page.waitForTimeout(8000);
+console.log("url:", page.url());
+console.log("title:", await page.title());
+console.log("cells:", await page.locator('[data-testid="UserCell"]').count());
+console.log("followingBtns:", await page.locator('[data-testid$="-unfollow"]').count());
+console.log("buttons:", await page.getByRole("button").count());
+await page.waitForTimeout(20000);
+await ctx.close();

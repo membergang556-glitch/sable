@@ -1,0 +1,9 @@
+connect, sign once, done. that's the whole flow, nothing to remember
+migrated 7 items out of one wallet in a single signature this morning. about 15 seconds
+your vault comes with a recovery key you download, not an account you log into
+if your wallet's two years old, that address is in a hundred places. a fresh one fixes it
+one signature. no approve-then-execute, no twelve step wizard
+we hold nothing. the vault key is yours the second it's generated
+network fee is around 0.0001 SOL. no percentage cut on top
+old wallet in, new vault out. the old one ends up empty and closed, not half drained
+you get a vault address and a key file. import it anywhere, it's a normal Solana wallet

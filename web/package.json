@@ -16,6 +16,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.40",
     "@solana/wallet-adapter-solflare": "^0.6.34",
     "@solana/web3.js": "^1.99.0",
+    "@vercel/analytics": "^2.0.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

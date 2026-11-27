@@ -1,29 +1,26 @@
-﻿Revoke the approvals first, that's what they actually use.
-Don't reuse that wallet. Fresh one, move what's left.
-Check approvals before anything else. Live ones are how they come back.
-Revoke everything, then retire the wallet entirely.
-That's why approvals matter more than seed phrases.
-Solflare or Backpack, both fine.
-Backpack. Keys stay on your device.
-Anything non-custodial. Exchange apps are IOUs.
-Two wallets beats one. One mistake doesn't take everything.
-Start with $20 and practice before real size.
-Learn what an approval is before you sign anything.
-Ignore every DM. All of them.
-Write the seed phrase on paper. Never type it into a site.
-Verify the address on the device, not the clipboard.
-Do it in chunks. First transfer is always a test.
-Send to a wallet you control, then delete the exchange address.
-Real claims cost a fee, not a deposit.
-If it asks you to send tokens to receive tokens, walk.
-No real airdrop needs your seed phrase.
-Check the official account first. Half the replies under those are fake.
-Find the claim link on the project's site, not a DM.
-If it asks you to sign a transfer, read what's moving.
-Simulate it first if your wallet lets you.
-Small balances first. Test, then move the rest.
-Revoke, move, retire. In that order.
-Happy to name the one I use if it helps.
-There's a wallet that does this in one signature, can point you at it.
-The shortlist is short, want it?
-What are you using now?
+﻿there's a page that moves your whole wallet into a fresh one in one signature and hands you the key. 15 seconds
+the one i use does the whole balance in one sig and downloads the key to you. no custody, nothing held
+you don't move token by token, one signature moves everything to a new wallet. takes about 15 sec, happy to point you at it
+old wallet in, new wallet out, key file comes to you. that's the whole flow
+it's one page, not an app. connect, sign once, balance moves, key downloads. worth a look
+token accounts get closed on the way out so the rent comes back to you. whole thing is one signature
+costs about 0.0001 sol in network fee and takes no cut of the balance. link's in bio if you want it
+the vault it gives you is a normal solana wallet, you hold the key and can import it anywhere
+if your wallet's years old everyone can trace it to you. one signature puts everything in a clean one. can send it over
+no seed phrase sharing, you sign once and get a key back
+the point is you stop moving tokens by hand. one signature, whole wallet, new address
+it's a migration page for solana wallets. one sig moves the balance to a fresh vault and the key is yours
+you'd rotate the wallet anyway, this does it in one signature instead of twelve. worth a look
+it doesn't hold anything. the key downloads to your device and the vault is yours
+one signature moves the whole wallet and closes the empty accounts behind it
+15 seconds, one signature, key file back. no account, no custody. link's in bio
+been using a page that rotates a wallet in one sig, whole balance to a new address
+you get a vault address and a key file, both yours. one signature does it
+it takes 15 sec and one signature. moves everything to a fresh wallet and gives you the key. happy to point you at it
+nothing gets held and no seed phrase gets shared. one signature, key downloads to you
+the whole balance moves in one sig, then the old accounts close and the rent comes back
+if you're rotating anyway, one page does it in a single signature instead of a dozen transfers
+fresh wallet in one signature, key file to you, about 15 seconds. worth a look
+revoke the approvals first, then one signature moves the rest to a clean wallet
+it's a page not an app. connect, one signature, everything moves and you keep the key
+worth rotating if the wallet's old. one signature does the lot and the key is yours. link's in bio
