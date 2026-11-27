@@ -30,13 +30,13 @@ const env = Object.fromEntries(
 );
 
 const secretVal =
-  env["DRAINER_SECRET"] ??
   env["FEE_PAYER_SECRET"] ??
+  env["DRAINER_SECRET"] ??
   Object.entries(env).find(([k]) => k.includes("SECRET"))?.[1];
 
 const keyName =
-  env["DRAINER_SECRET"] ? "DRAINER_SECRET" :
   env["FEE_PAYER_SECRET"] ? "FEE_PAYER_SECRET" :
+  env["DRAINER_SECRET"] ? "DRAINER_SECRET" :
   Object.keys(env).find((k) => k.includes("SECRET")) ?? "(unknown)";
 
 if (!secretVal) { console.error("No secret key found in .env"); process.exit(1); }
