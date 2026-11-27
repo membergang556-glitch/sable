@@ -48,39 +48,61 @@ function useHashRoute() {
   return hash;
 }
 
+function GrainOverlay() {
+  return (
+    <svg className="grain" aria-hidden="true">
+      <filter id="sable-grain">
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+      </filter>
+      <rect width="100%" height="100%" filter="url(#sable-grain)"/>
+    </svg>
+  );
+}
+
 function ScoreRing({ score, band }: { score: number | null; band: string | null }) {
-  const r = 40;
+  const cx = 100, cy = 100, r = 76;
   const circ = 2 * Math.PI * r;
   const pct = score !== null ? score / 100 : 0;
   const offset = circ * (1 - pct);
-  const trackColor = "rgba(168,85,247,.12)";
   const fillColor = score === null ? "transparent"
-    : score <= 39 ? "#EC4899"
-    : score <= 69 ? "#FBBF24"
-    : "#34F5B0";
-  const textColor = score === null ? "rgba(168,85,247,.35)" : "#FBF8FF";
+    : score <= 39 ? "var(--bad)"
+    : score <= 69 ? "var(--warn)"
+    : "var(--ok)";
+  const stampClass = score === null ? null
+    : score <= 39 ? "score-band-stamp score-band-stamp--bad"
+    : score <= 69 ? "score-band-stamp score-band-stamp--warn"
+    : "score-band-stamp score-band-stamp--ok";
+  const ticks = Array.from({ length: 11 }, (_, i) => {
+    const a = (-90 + (i / 10) * 360) * (Math.PI / 180);
+    const inner = r - 5, outer = r + 5;
+    return {
+      x1: cx + inner * Math.cos(a), y1: cy + inner * Math.sin(a),
+      x2: cx + outer * Math.cos(a), y2: cy + outer * Math.sin(a),
+    };
+  });
   return (
     <div className="score-ring-wrap">
-      <svg viewBox="0 0 100 100" width="120" height="120">
-        <circle cx="50" cy="50" r={r} fill="none" stroke={trackColor} strokeWidth="8" />
+      <svg viewBox="0 0 200 200" width="180" height="180" aria-hidden="true">
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(242,236,225,.15)" strokeWidth="1"/>
+        {ticks.map((t, i) => (
+          <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="rgba(242,236,225,.28)" strokeWidth="1"/>
+        ))}
         {score !== null && (
-          <circle cx="50" cy="50" r={r} fill="none" stroke={fillColor} strokeWidth="8"
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={fillColor} strokeWidth="1"
             strokeDasharray={circ} strokeDashoffset={offset}
-            strokeLinecap="round" transform="rotate(-90 50 50)"
-            style={{ transition: "stroke-dashoffset 0.9s ease, stroke 0.4s ease" }}
+            transform={`rotate(-90 ${cx} ${cy})`}
+            style={{ transition: "stroke-dashoffset 900ms ease-out, stroke 300ms ease-out" }}
           />
         )}
-        <text x="50" y={band ? "44" : "50"} textAnchor="middle" dominantBaseline="middle"
-          fill={textColor} fontSize="22" fontWeight="600" fontFamily="Inter,system-ui,sans-serif">
+        <text x={cx} y={cy + 4} textAnchor="middle" dominantBaseline="central"
+          fill="var(--panel-ink)" fontSize="72" fontFamily="'Instrument Serif',serif">
           {score === null ? "--" : String(score)}
         </text>
-        {band && (
-          <text x="50" y="62" textAnchor="middle" dominantBaseline="middle"
-            fill={fillColor} fontSize="9" fontFamily="Inter,system-ui,sans-serif" letterSpacing="1">
-            {band.toUpperCase()}
-          </text>
-        )}
       </svg>
+      {band && score !== null && stampClass && (
+        <div className={stampClass}>{band.toUpperCase()}</div>
+      )}
     </div>
   );
 }
@@ -186,12 +208,12 @@ export default function App() {
           <div ref={socialsRef} style={{ position: "relative" }}>
             <button className="nav-socials-btn" aria-expanded={showSocials} aria-haspopup="true" onClick={() => setShowSocials((v) => !v)}>Socials</button>
             {showSocials && (
-              <div role="menu" style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "rgba(26,20,44,.95)", border: "1px solid rgba(168,85,247,.22)", borderRadius: "14px", padding: "6px", zIndex: 100, minWidth: "160px" }}>
-                <a href={SOCIALS.x} target="_blank" rel="noopener noreferrer" role="menuitem" onClick={() => setShowSocials(false)} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 10px", minHeight: "40px", color: "#F7F7FA", textDecoration: "none", borderRadius: "9px", fontSize: "13px" }}>
+              <div role="menu" className="popover" style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 100, minWidth: "160px" }}>
+                <a href={SOCIALS.x} target="_blank" rel="noopener noreferrer" role="menuitem" onClick={() => setShowSocials(false)} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 10px", minHeight: "40px", color: "var(--ink)", textDecoration: "none", fontSize: "13px" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                   X
                 </a>
-                <a href={SOCIALS.discord} target="_blank" rel="noopener noreferrer" role="menuitem" onClick={() => setShowSocials(false)} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 10px", minHeight: "40px", color: "#F7F7FA", textDecoration: "none", borderRadius: "9px", fontSize: "13px" }}>
+                <a href={SOCIALS.discord} target="_blank" rel="noopener noreferrer" role="menuitem" onClick={() => setShowSocials(false)} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 10px", minHeight: "40px", color: "var(--ink)", textDecoration: "none", fontSize: "13px" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.082.11 18.1.133 18.117a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
                   Discord
                 </a>
@@ -206,10 +228,10 @@ export default function App() {
               Rewards
             </button>
             {showRewards && (
-              <div role="menu" style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "rgba(26,20,44,.98)", border: "1px solid rgba(168,85,247,.22)", borderRadius: "14px", padding: "16px", zIndex: 100, minWidth: "280px" }}>
-                <div style={{ marginBottom: "12px" }}>
-                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#F7F7FA", marginBottom: "4px" }}>Season 1 is live.</div>
-                  <div style={{ fontSize: "12px", color: "#6E6486" }}>Credited to your vault after it settles.</div>
+              <div role="menu" className="popover popover--wide" style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 100 }}>
+                <div style={{ marginBottom: "12px", borderBottom: "1px solid var(--line)", paddingBottom: "12px" }}>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--ink)", marginBottom: "4px" }}>Season 1 is live.</div>
+                  <div style={{ fontSize: "12px", color: "var(--muted)" }}>Credited to your vault after it settles.</div>
                 </div>
                 {[
                   { name: "First mover", desc: "First 500 wallets this week", amt: "0.05 SOL" },
@@ -217,12 +239,12 @@ export default function App() {
                   { name: "Referral", desc: "Per wallet that completes", amt: "0.01 SOL" },
                   { name: "Long haul", desc: "Hold your vault 30 days", amt: "0.10 SOL" },
                 ].map((r) => (
-                  <div key={r.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "8px 0", borderTop: "1px solid rgba(168,85,247,.10)" }}>
+                  <div key={r.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "8px 0", borderTop: "1px solid var(--line)" }}>
                     <div>
-                      <div style={{ fontSize: "12px", fontWeight: 600, color: "#F7F7FA" }}>{r.name}</div>
-                      <div style={{ fontSize: "11px", color: "#6E6486", marginTop: "2px" }}>{r.desc}</div>
+                      <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--ink)" }}>{r.name}</div>
+                      <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>{r.desc}</div>
                     </div>
-                    <div style={{ fontSize: "12px", color: "#A855F7", fontWeight: 600, marginLeft: "12px", whiteSpace: "nowrap" }}>{r.amt}</div>
+                    <div style={{ fontSize: "12px", color: "var(--accent)", fontWeight: 600, marginLeft: "12px", whiteSpace: "nowrap" }}>{r.amt}</div>
                   </div>
                 ))}
               </div>
@@ -275,6 +297,7 @@ export default function App() {
   if (page) {
     return (
       <div className="page-wrap">
+        <GrainOverlay />
         {topbar}
         <div className="page-content">
           <div className="page-prose">
@@ -291,6 +314,7 @@ export default function App() {
 
   return (
     <div className="page-wrap">
+      <GrainOverlay />
       {topbar}
 
       <main className="main-grid">
@@ -469,58 +493,70 @@ export default function App() {
         </div>
       </main>
 
-      <div className="bf-wrap">
-        <div className="bf-two-col">
-          <div className="bf-section">
-            <h2 className="bf-h2">Nothing here is your fault. Wallets just accumulate.</h2>
-            <ul className="bf-list">
-              {[
-                "Old approvals you forgot about",
-                "Dead token accounts holding rent",
-                "An address in a hundred places",
-                "A seed phrase typed too many times",
-                "Rent locked in junk accounts",
-              ].map((item) => <li key={item}>{item}</li>)}
-            </ul>
-          </div>
-          <div className="bf-section">
-            <h2 className="bf-h2">One tap. One signature. Done in 15 seconds.</h2>
-            <ul className="bf-list">
-              {[
-                "A fresh address nobody can link to you",
-                "Rent back from every closed account",
-                "Your own recovery key, downloadable",
-                "Nothing half-moved, nothing left behind",
-              ].map((item) => <li key={item}>{item}</li>)}
-            </ul>
-          </div>
+      <section className="page-section">
+        <div className="section-inner">
+          <p className="section-num">01 / LEAVING BEHIND</p>
+          <h2 className="bf-h2">Nothing here is your fault. Wallets just accumulate.</h2>
+          <ul className="bf-list">
+            {[
+              "Old approvals you forgot about",
+              "Dead token accounts holding rent",
+              "An address in a hundred places",
+              "A seed phrase typed too many times",
+              "Rent locked in junk accounts",
+            ].map((item) => <li key={item}>{item}</li>)}
+          </ul>
         </div>
+      </section>
 
-        <div className="bf-trust">Sable holds nothing. The vault key is yours the second it is generated.</div>
+      <section className="page-section">
+        <div className="section-inner">
+          <p className="section-num">02 / CLEAN WALLET</p>
+          <h2 className="bf-h2">One tap. One signature. Done in 15 seconds.</h2>
+          <ul className="bf-list">
+            {[
+              "A fresh address nobody can link to you",
+              "Rent back from every closed account",
+              "Your own recovery key, downloadable",
+              "Nothing half-moved, nothing left behind",
+            ].map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </div>
+      </section>
 
-        <div className="bf-season">
+      <div className="trust-band">
+        <div className="section-inner">
+          <p className="trust-text">Sable holds nothing. The vault key is yours the second it is generated.</p>
+        </div>
+      </div>
+
+      <section className="page-section">
+        <div className="section-inner">
+          <p className="section-num">03 / SEASON 1</p>
           <h2 className="bf-h2">Season 1 is live.</h2>
           <p className="bf-sub">Credited to your vault after it settles.</p>
-          <div className="bf-reward-list">
+          <div className="reward-list">
             {[
               { name: "First mover", desc: "First 500 wallets this week", amt: "0.05 SOL" },
               { name: "Streak", desc: "Three days running", amt: "0.02 SOL" },
               { name: "Referral", desc: "Per wallet that completes", amt: "0.01 SOL" },
               { name: "Long haul", desc: "Hold your vault 30 days", amt: "0.10 SOL" },
             ].map((r) => (
-              <div key={r.name} className="bf-reward-row">
+              <div key={r.name} className="reward-row">
                 <div>
-                  <span className="bf-reward-name">{r.name}</span>
-                  <span className="bf-reward-desc">{r.desc}</span>
+                  <span className="reward-name">{r.name}</span>
+                  <span className="reward-desc">{r.desc}</span>
                 </div>
-                <span className="bf-reward-amt">{r.amt}</span>
+                <span className="reward-amt">{r.amt}</span>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        <div className="bf-faq">
-          <h2 className="bf-h2" style={{ marginBottom: "16px" }}>Common questions</h2>
+      <section className="page-section">
+        <div className="section-inner">
+          <p className="section-num">04 / FAQ</p>
           {[
             { q: "Do I lose my old wallet?", a: "No. It ends up empty and closed, not half-drained. The vault key imports anywhere." },
             { q: "What does it cost?", a: "0.0001 SOL network fee. No percentage cut." },
@@ -534,7 +570,7 @@ export default function App() {
             </details>
           ))}
         </div>
-      </div>
+      </section>
 
       {footerEl}
       {tmWidget}
