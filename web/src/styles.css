@@ -746,17 +746,18 @@ footer {
 }
 
 .nav-socials-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+  border-radius: 7px;
+  padding: 3px 10px;
   font: inherit;
   font-size: 12px;
-  color: #6E6486;
+  color: #A855F7;
   cursor: pointer;
-  transition: color 140ms ease;
+  transition: background 140ms ease, border-color 140ms ease;
 }
 
-.nav-socials-btn:hover { color: #A79FC4; }
+.nav-socials-btn:hover { background: rgba(168, 85, 247, 0.14); border-color: rgba(168, 85, 247, 0.40); }
 
 .muted { color: #6E6486; }
 .sm    { font-size: 12px; }
