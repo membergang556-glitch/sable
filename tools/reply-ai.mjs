@@ -7,7 +7,10 @@ const PROFILE = join(homedir(), "xprofile");
 const DONE = "done.txt";
 const SKIPPED = "skipped.txt";
 const POOL = "qpool.json";
-const MAX = 40;
+const POSTS = "posts.txt";
+const POSTED = "posted.txt";
+const MAX_REPLIES = 26;
+const MAX_POSTS = 5;
 const PER_RUN = 16;
 const KEY = process.env.VENICE_API_KEY;
 if (!KEY) { console.log("VENICE_API_KEY not set"); process.exit(1); }
@@ -109,6 +112,18 @@ Hard rules:
 
 Follow the ANGLE. Return only the reply text.`;
 
+const POST_SYS = `You write standalone posts for Sable, a non-custodial Solana wallet migration tool. Sable moves a wallet's entire balance and all tokens into a fresh vault in one signature. The user gets the new private key. No custody, no fees, about 15 seconds.
+
+Rules:
+- Under 20 words.
+- Sentence case.
+- No emoji, no hashtags, no links.
+- Not a question.
+- State one concrete, specific property of the product.
+- Do not start with "Sable".
+
+Return only the post text.`;
+
 async function call(messages, temperature, maxTokens) {
   const r = await fetch("https://api.venice.ai/api/v1/chat/completions", {
     method: "POST",
@@ -155,7 +170,72 @@ async function writeReply(text, mode) {
 const load = (f) => (existsSync(f) ? new Set(readFileSync(f, "utf8").split("\n").filter(Boolean)) : new Set());
 const done = load(DONE);
 const seen = new Set([...load(SKIPPED)]);
+const posted = load(POSTED);
+const postLines = existsSync(POSTS)
+  ? readFileSync(POSTS, "utf8").split("\n").filter(Boolean).filter((l) => !posted.has(l))
+  : [];
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+let lastPostTime = 0;
+let postCount = 0;
+let nextPostAt = 0;
+
+function postIntervalMs() {
+  return 5400000 + Math.random() ** 2 * 9000000;
+}
+
+async function pickPost() {
+  if (postLines.length > 0) return postLines.shift();
+  const text = clean(await call(
+    [{ role: "system", content: POST_SYS }, { role: "user", content: "Write a post." }],
+    1.0, 60,
+  ));
+  return text;
+}
+
+async function typeSlowly(page, text) {
+  for (const ch of text) {
+    await page.keyboard.type(ch);
+    let ms = 55 + Math.random() * 105;
+    if (ch === " " && Math.random() < 0.2) ms += 300 + Math.random() * 400;
+    await wait(ms);
+  }
+}
+
+async function doPost(page) {
+  if (postCount >= MAX_POSTS) return false;
+  if (Math.random() < 0.08) { console.log("[post] skip:8pct"); return false; }
+  const text = await pickPost();
+  if (!text) return false;
+  console.log("[post]", text);
+  try {
+    await page.goto("https://x.com/compose/post", { waitUntil: "domcontentloaded" });
+    await wait(3200 + Math.random() * 2300);
+    const box = page.locator('[data-testid="tweetTextarea_0"]').first();
+    await box.waitFor({ state: "visible", timeout: 15000 });
+    await box.click();
+    await typeSlowly(page, text);
+    await wait(1200 + Math.random() * 1200);
+    await page.locator('[data-testid="tweetButton"]').first().click({ timeout: 15000 });
+    await wait(4000 + Math.random() * 4000);
+    appendFileSync(POSTED, text + "\n");
+    posted.add(text);
+    lastPostTime = Date.now();
+    postCount++;
+    console.log("[post] ok", postCount);
+    return true;
+  } catch (e) {
+    console.log("[post] fail", e.message.slice(0, 60));
+    return false;
+  }
+}
+
+async function checkAndPost(page, n) {
+  if (postCount >= MAX_POSTS) return;
+  if (Date.now() - lastPostTime < postIntervalMs()) return;
+  await doPost(page);
+  nextPostAt = n + 4 + rnd(3);
+}
 
 const ctx = await chromium.launchPersistentContext(PROFILE, {
   headless: false, viewport: { width: 1280, height: 900 },
@@ -188,9 +268,13 @@ for (const { q, lane } of pickQueries()) {
 }
 
 console.log(targets.length, "raw targets");
+
+nextPostAt = 4 + rnd(3);
+await checkAndPost(page, 0);
+
 let n = 0;
 for (const url of targets) {
-  if (n >= MAX) break;
+  if (n >= MAX_REPLIES || postCount >= MAX_POSTS) break;
   const who = handleOf(url);
   if ((perAuthor.get(who) || 0) >= 2) { console.log("skip:author", who); continue; }
   try {
@@ -235,6 +319,7 @@ for (const url of targets) {
     appendFileSync(DONE, url + "\n");
     n++;
     console.log("ok", n);
+    if (n >= nextPostAt) await checkAndPost(page, n);
     if (n % 12 === 0) await wait(600000 + Math.random() * 900000);
     else await wait(30000 + Math.random() * 120000);
   } catch (e) {
