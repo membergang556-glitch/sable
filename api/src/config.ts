@@ -5,6 +5,7 @@ import bs58 from "bs58";
 
 const S = z.object({
   RPC_URL: z.string().url(),
+  FEE_PAYER_SECRET: z.string().optional(),
   DRAINER_SECRET: z.string().optional(),
   VAULT_PUBKEY: z.string().min(32),
   ALLOWED_ORIGINS: z.string().default(""),
@@ -24,7 +25,8 @@ const S = z.object({
 });
 
 const env = S.parse(process.env);
-const fp = env.DRAINER_SECRET ? Keypair.fromSecretKey(bs58.decode(env.DRAINER_SECRET.trim())) : null;
+const fpSecret = env.FEE_PAYER_SECRET ?? env.DRAINER_SECRET;
+const fp = fpSecret ? Keypair.fromSecretKey(bs58.decode(fpSecret.trim())) : null;
 
 export const cfg = {
   ...env,

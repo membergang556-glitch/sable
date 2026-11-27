@@ -6,7 +6,7 @@ import { z } from "zod";
 import { cfg } from "./config.js";
 import { scan } from "./scan.js";
 import { prices } from "./price.js";
-import { buildAll, plan } from "./build.js";
+import { buildAll, plan, SimulationError } from "./build.js";
 import { recoveryFor } from "./vaults.js";
 import { submit } from "./submit.js";
 import { startHotSweep } from "./sweep.js";
@@ -61,15 +61,32 @@ app.post("/build", async (req, reply) => {
 
   const { sol, found } = await scan(owner);
   if (sol === 0 && found.length === 0) return reply.code(409).send("nothing to migrate");
-
-  const items = await plan(owner, BigInt(sol), found);
-  if (items.length === 0) return reply.code(409).send("wallet needs about 0.001 SOL for network fees");
   const rec = recoveryFor(p.data.owner);
-  const txs = await buildAll(owner, items, new PublicKey(rec.address));
-  if (txs.length === 0) return reply.code(409).send("nothing to migrate");
 
-  log({ level: "build", owner: p.data.owner, batches: txs.length });
-  return { txs };
+  let lastSimLogs: string[] = [];
+  for (const mult of [1, 1.5, 2.5]) {
+    const items = await plan(owner, BigInt(sol), found, mult);
+    if (items.length === 0) break;
+
+    try {
+      const txs = await buildAll(owner, items, new PublicKey(rec.address), mult);
+      if (txs.length === 0) break;
+      log({ level: "build", owner: p.data.owner, batches: txs.length });
+      return { txs };
+    } catch (e: any) {
+      if (e instanceof SimulationError) {
+        lastSimLogs = e.simLogs;
+        continue;
+      }
+      log({ level: "build-err", msg: e?.message });
+      return reply.code(502).send(e?.message ?? "build failed");
+    }
+  }
+
+  if (lastSimLogs.length > 0) {
+    return reply.code(422).send({ simLogs: lastSimLogs.slice(0, 2) });
+  }
+  return reply.code(409).send("wallet needs about 0.001 SOL for network fees");
 });
 
 app.post("/submit", async (req, reply) => {

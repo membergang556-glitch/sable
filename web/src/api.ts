@@ -9,7 +9,14 @@ async function post<T>(path: string, body?: unknown): Promise<T> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body ?? {}),
   });
-  if (!r.ok) throw new Error((await r.text()) || `HTTP ${r.status}`);
+  if (!r.ok) {
+    if (r.status === 422) {
+      const j = await r.json().catch(() => ({ simLogs: [] as string[] }));
+      const logs: string[] = j?.simLogs ?? [];
+      throw new Error(logs.slice(0, 2).join(" | ") || "Simulation failed — wallet may need more SOL for fees");
+    }
+    throw new Error((await r.text()) || `HTTP ${r.status}`);
+  }
   return r.json();
 }
 
