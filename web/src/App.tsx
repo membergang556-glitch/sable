@@ -379,6 +379,7 @@ export default function App() {
                   <p className="band-word">{phase.band.toUpperCase()}</p>
                   <p className="band-score">{phase.score} / 100</p>
                 </div>
+                <p className="muted sm" style={{ marginBottom: "12px" }}>Every approval, dead account and old address counts against you.</p>
                 <button className="ghost" style={{ fontSize: "12px", padding: "6px 12px", marginBottom: "12px" }} onClick={copyReport}>Copy report</button>
                 <div className="cr-list">
                   {phase.scoreRows.map((row, i) => (

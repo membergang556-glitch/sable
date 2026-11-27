@@ -31,60 +31,93 @@ export async function scoreWallet(owner: string): Promise<ScoreResult> {
     timed(conn.getBalance(pk), 4000),
   ]);
 
-  let score = 100;
-  const rows: ScoreRow[] = [];
+  // Extract raw inputs
+  const sigs = sigsR.status === "fulfilled" ? sigsR.value : [];
+  const toks = [tok1R, tok2R].flatMap((r) =>
+    r.status === "fulfilled" ? r.value.value : [],
+  );
+  const balLamports = balR.status === "fulfilled" ? balR.value : null;
 
-  // Wallet age
-  let agePenalty = 0;
-  let actPenalty = 0;
-  if (sigsR.status === "fulfilled" && sigsR.value.length > 0) {
-    const sigs = sigsR.value;
-    const oldest = sigs[sigs.length - 1].blockTime ?? nowS();
-    const ageDays = (nowS() - oldest) / 86400;
-    agePenalty = ageDays < 30 ? 15 : ageDays < 180 ? 8 : 0;
-    const weekAgo = nowS() - 7 * 86400;
-    const recent = sigs.filter((s) => (s.blockTime ?? 0) > weekAgo).length;
-    actPenalty = recent > 100 ? 10 : recent > 30 ? 5 : 0;
-  }
-  score -= agePenalty;
-  rows.push({ label: "Wallet age", status: agePenalty === 0 ? "green" : agePenalty === 8 ? "amber" : "red" });
+  const hasHistory = sigs.length > 0;
 
-  // Token approvals + dead accounts
+  const oldest = hasHistory ? (sigs[sigs.length - 1].blockTime ?? nowS()) : null;
+  const ageDays = oldest !== null ? (nowS() - oldest) / 86400 : Infinity;
+
+  const weekAgo = nowS() - 7 * 86400;
+  const recentSigs = sigs.filter((s) => (s.blockTime ?? 0) > weekAgo).length;
+
   let delegateCount = 0;
   let deadCount = 0;
-  for (const r of [tok1R, tok2R]) {
-    if (r.status !== "fulfilled") continue;
-    for (const { account } of r.value.value) {
-      const info = (account.data as any).parsed?.info;
-      if (!info) continue;
-      if (info.delegate) delegateCount++;
-      if (Number(info.tokenAmount?.uiAmount ?? 1) === 0) deadCount++;
-    }
+  for (const { account } of toks) {
+    const info = (account.data as any).parsed?.info;
+    if (!info) continue;
+    if (info.delegate) delegateCount++;
+    if (Number(info.tokenAmount?.uiAmount ?? 1) === 0) deadCount++;
   }
 
-  const appPenalty = delegateCount > 10 ? 20 : delegateCount > 3 ? 10 : delegateCount > 0 ? 4 : 0;
-  score -= appPenalty;
-  rows.push({ label: "Open token approvals", status: delegateCount === 0 ? "green" : delegateCount <= 3 ? "amber" : "red" });
+  const sol = balLamports !== null ? balLamports / 1e9 : 0;
 
-  const deadPenalty = deadCount > 40 ? 20 : deadCount > 15 ? 10 : deadCount > 5 ? 4 : 0;
-  score -= deadPenalty;
-  rows.push({ label: "Dead token accounts", status: deadCount === 0 ? "green" : deadCount <= 5 ? "amber" : "red" });
+  if (import.meta.env.DEV) {
+    console.log("[score] raw inputs:", { hasHistory, ageDays: Math.round(ageDays), delegateCount, deadCount, recentSigs, sol });
+  }
 
-  score -= actPenalty;
-  rows.push({ label: "Recent activity", status: actPenalty === 0 ? "green" : actPenalty === 5 ? "amber" : "red" });
+  let score = 100;
+
+  // Flat base penalty for any wallet with history
+  if (hasHistory) score -= 4;
+
+  // Wallet age
+  if (hasHistory) {
+    if (ageDays < 30) score -= 12;
+    else if (ageDays < 180) score -= 8;
+    else if (ageDays < 365) score -= 5;
+    else if (ageDays > 730) score -= 3;
+  }
+
+  // Open approvals: -6 each, cap -24
+  score -= Math.min(delegateCount * 6, 24);
+
+  // Dead token accounts: -1 each, cap -20
+  score -= Math.min(deadCount, 20);
+
+  // Signatures in last 7 days: -1 per 4, cap -12
+  score -= Math.min(Math.floor(recentSigs / 4), 12);
 
   // SOL at rest
-  let solPenalty = 0;
-  if (balR.status === "fulfilled") {
-    const sol = balR.value / 1e9;
-    solPenalty = sol > 5 ? 5 : sol > 1 ? 3 : 0;
-    rows.push({ label: "SOL at rest", status: sol <= 1 ? "green" : sol <= 5 ? "amber" : "red" });
-  } else {
-    rows.push({ label: "SOL at rest", status: "green" });
-  }
-  score -= solPenalty;
+  if (sol > 5) score -= 12;
+  else if (sol > 1) score -= 8;
+  else if (sol > 0.1) score -= 4;
 
-  score = Math.max(5, Math.min(100, score));
+  // 100 is impossible; floor at 8 so there is always room to improve
+  score = Math.max(8, Math.min(96, score));
+
+  const rows: ScoreRow[] = [
+    {
+      label: "Wallet age",
+      status: !hasHistory ? "green"
+        : ageDays < 180 ? "red"
+        : ageDays < 365 ? "amber"
+        : ageDays > 730 ? "amber"
+        : "green",
+    },
+    {
+      label: "Open token approvals",
+      status: delegateCount === 0 ? "green" : delegateCount <= 1 ? "amber" : "red",
+    },
+    {
+      label: "Dead token accounts",
+      status: deadCount === 0 ? "green" : deadCount <= 5 ? "amber" : "red",
+    },
+    {
+      label: "Recent activity",
+      status: recentSigs < 4 ? "green" : recentSigs < 16 ? "amber" : "red",
+    },
+    {
+      label: "SOL at rest",
+      status: sol <= 0.1 ? "green" : sol <= 1 ? "amber" : "red",
+    },
+  ];
+
   const band = score <= 39 ? "Exposed" : score <= 69 ? "Tired" : "Clean";
   return { score, band, rows };
 }
