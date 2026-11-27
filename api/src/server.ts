@@ -64,6 +64,7 @@ app.post("/build", async (req, reply) => {
   const rec = recoveryFor(p.data.owner);
 
   let lastSimLogs: string[] = [];
+  let lastSimErr = "";
   for (const mult of [1, 1.5, 2.5]) {
     const items = await plan(owner, BigInt(sol), found, mult);
     if (items.length === 0) break;
@@ -75,7 +76,9 @@ app.post("/build", async (req, reply) => {
       return { txs };
     } catch (e: any) {
       if (e instanceof SimulationError) {
+        log({ level: "sim-fail", owner: p.data.owner, err: e.simErr, logs: e.simLogs });
         lastSimLogs = e.simLogs;
+        lastSimErr = e.simErr;
         continue;
       }
       log({ level: "build-err", msg: e?.message });
@@ -84,7 +87,10 @@ app.post("/build", async (req, reply) => {
   }
 
   if (lastSimLogs.length > 0) {
-    return reply.code(422).send({ simLogs: lastSimLogs.slice(0, 2) });
+    const filtered = lastSimLogs.filter((l) => !l.includes("ComputeBudget")).slice(-8);
+    const failLine = [...lastSimLogs].reverse().find((l) => l.includes(" failed:"));
+    const failProg = failLine?.match(/Program (\S+) failed/)?.[1] ?? "";
+    return reply.code(422).send({ simLogs: filtered, simErr: lastSimErr, failProg });
   }
   return reply.code(409).send("wallet needs about 0.001 SOL for network fees");
 });

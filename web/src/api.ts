@@ -11,9 +11,14 @@ async function post<T>(path: string, body?: unknown): Promise<T> {
   });
   if (!r.ok) {
     if (r.status === 422) {
-      const j = await r.json().catch(() => ({ simLogs: [] as string[] }));
+      const j = await r.json().catch(() => ({ simLogs: [] as string[], simErr: "", failProg: "" }));
       const logs: string[] = j?.simLogs ?? [];
-      throw new Error(logs.slice(0, 2).join(" | ") || "Simulation failed — wallet may need more SOL for fees");
+      const detail = [j?.failProg, j?.simErr].filter(Boolean).join(": ");
+      const err = Object.assign(
+        new Error(logs[0] || "Simulation failed — wallet may need more SOL for fees"),
+        { simLogs: logs, simErr: detail },
+      );
+      throw err;
     }
     throw new Error((await r.text()) || `HTTP ${r.status}`);
   }

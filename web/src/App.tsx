@@ -13,7 +13,7 @@ type Phase =
   | { k: "signing"; step: number; of: number }
   | { k: "submitting"; step: number; of: number }
   | { k: "done"; sig: string; count: number; key: string }
-  | { k: "error"; msg: string };
+  | { k: "error"; msg: string; simLogs?: string[]; simErr?: string };
 
 type PageId = "docs" | "security" | "terms" | "privacy" | "changelog";
 
@@ -159,7 +159,7 @@ export default function App() {
       } catch (e: any) {
         const msg = e?.message ?? "";
         if (/reject|denied|cancel/i.test(msg)) { setPhase({ ...review, k: "review" }); return; }
-        if (attempt === 2 || !/blockhash/i.test(msg)) { setPhase({ k: "error", msg: msg || "Rotation failed" }); return; }
+        if (attempt === 2 || !/blockhash/i.test(msg)) { setPhase({ k: "error", msg: msg || "Rotation failed", simLogs: (e as any)?.simLogs, simErr: (e as any)?.simErr }); return; }
         await new Promise((r) => setTimeout(r, 500));
       }
     }
@@ -518,6 +518,14 @@ export default function App() {
               <div className="phase">
                 <h1>That didn't go through.</h1>
                 <p className="lede">{phase.msg}</p>
+                {phase.simLogs && phase.simLogs.length > 0 && (
+                  <pre style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", lineHeight: "1.6", whiteSpace: "pre-wrap", wordBreak: "break-all", textAlign: "left", margin: "8px 0 4px", maxWidth: "100%", color: "inherit" }}>
+                    {phase.simLogs.slice(0, 4).join("\n")}
+                  </pre>
+                )}
+                {phase.simErr && (
+                  <p className="muted sm" style={{ marginBottom: "12px" }}>{phase.simErr}</p>
+                )}
                 <button className="primary" onClick={run}>Try again</button>
               </div>
             )}

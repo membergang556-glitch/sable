@@ -19,9 +19,11 @@ export type Plan = { sol: bigint; tokens: Found[]; rec: boolean; balance?: bigin
 
 export class SimulationError extends Error {
   simLogs: string[];
-  constructor(logs: string[]) {
+  simErr: string;
+  constructor(logs: string[], simErr = "") {
     super("simulation failed");
     this.simLogs = logs;
+    this.simErr = simErr;
   }
 }
 
@@ -183,7 +185,8 @@ export async function buildAll(
     try {
       const sim = await conn.simulateTransaction(tx, { replaceRecentBlockhash: true, sigVerify: false });
       if (sim.value.err) {
-        throw new SimulationError(sim.value.logs ?? []);
+        const errStr = typeof sim.value.err === "string" ? sim.value.err : JSON.stringify(sim.value.err);
+        throw new SimulationError(sim.value.logs ?? [], errStr);
       }
     } catch (e: unknown) {
       if (e instanceof SimulationError) throw e;
