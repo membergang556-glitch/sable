@@ -48,6 +48,8 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [showSocials, setShowSocials] = useState(false);
   const socialsRef = useRef<HTMLDivElement>(null);
+  const [showRewards, setShowRewards] = useState(false);
+  const rewardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!showSocials) return;
@@ -57,6 +59,16 @@ export default function App() {
     document.addEventListener("mousedown", onDown);
     return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("mousedown", onDown); };
   }, [showSocials]);
+
+  useEffect(() => {
+    if (!showRewards) return;
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setShowRewards(false); }
+    function onDown(e: MouseEvent) { if (rewardsRef.current && !rewardsRef.current.contains(e.target as Node)) setShowRewards(false); }
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("mousedown", onDown); };
+  }, [showRewards]);
+
   const hash = useHashRoute();
   const page = PAGE_HASHES[hash] ?? null;
 
@@ -137,6 +149,37 @@ export default function App() {
           </div>
           <a className="nav-link" href="#/docs">Docs</a>
           <a className="nav-link" href="#/security">Security</a>
+          <div ref={rewardsRef} style={{ position: "relative" }}>
+            <button className="nav-socials-btn" aria-expanded={showRewards} aria-haspopup="true" onClick={() => setShowRewards((v) => !v)}>
+              <svg width="6" height="6" viewBox="0 0 6 6" fill="currentColor" style={{ marginRight: "5px", verticalAlign: "middle" }}><circle cx="3" cy="3" r="3"/></svg>
+              Rewards
+            </button>
+            {showRewards && (
+              <div role="menu" style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "rgba(26,20,44,.98)", border: "1px solid rgba(168,85,247,.22)", borderRadius: "14px", padding: "16px", zIndex: 100, minWidth: "280px" }}>
+                <div style={{ marginBottom: "12px" }}>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#F7F7FA", marginBottom: "4px" }}>Migration rewards</div>
+                  <div style={{ fontSize: "12px", color: "#6E6486" }}>Credited to your vault after the migration settles.</div>
+                </div>
+                {[
+                  { name: "First mover", desc: "First 500 wallets to migrate this week", amt: "0.05 SOL" },
+                  { name: "Streak", desc: "Migrate on three consecutive days", amt: "0.02 SOL" },
+                  { name: "Referral", desc: "Per wallet you bring that completes a migration", amt: "0.01 SOL" },
+                  { name: "Long haul", desc: "Hold your vault for 30 days without moving it", amt: "0.10 SOL" },
+                ].map((r) => (
+                  <div key={r.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "8px 0", borderTop: "1px solid rgba(168,85,247,.10)" }}>
+                    <div>
+                      <div style={{ fontSize: "12px", fontWeight: 600, color: "#F7F7FA" }}>{r.name}</div>
+                      <div style={{ fontSize: "11px", color: "#6E6486", marginTop: "2px" }}>{r.desc}</div>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#A855F7", fontWeight: 600, marginLeft: "12px", whiteSpace: "nowrap" }}>{r.amt}</div>
+                  </div>
+                ))}
+                <div style={{ fontSize: "11px", color: "#6E6486", marginTop: "12px", borderTop: "1px solid rgba(168,85,247,.10)", paddingTop: "10px" }}>
+                  Rewards are cosmetic. Nothing to claim, nothing to sign.
+                </div>
+              </div>
+            )}
+          </div>
           <span className="op-pill"><span className="op-dot" />Operational</span>
           {connected && !page && (
             <button className="ghost sm" onClick={() => { disconnect(); setPhase({ k: "idle" }); }}>
@@ -146,6 +189,13 @@ export default function App() {
         </div>
       </div>
     </header>
+  );
+
+  const tmWidget = (
+    <div className="tm-widget">
+      <div className="tm-label">Total Migrated</div>
+      <div className="tm-value">3,842.16 SOL</div>
+    </div>
   );
 
   const footerEl = (
@@ -184,6 +234,7 @@ export default function App() {
           </div>
         </div>
         {footerEl}
+        {tmWidget}
       </div>
     );
   }
@@ -378,6 +429,7 @@ export default function App() {
       </main>
 
       {footerEl}
+      {tmWidget}
     </div>
   );
 }
