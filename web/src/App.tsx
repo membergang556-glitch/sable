@@ -174,9 +174,6 @@ export default function App() {
                     <div style={{ fontSize: "12px", color: "#A855F7", fontWeight: 600, marginLeft: "12px", whiteSpace: "nowrap" }}>{r.amt}</div>
                   </div>
                 ))}
-                <div style={{ fontSize: "11px", color: "#6E6486", marginTop: "12px", borderTop: "1px solid rgba(168,85,247,.10)", paddingTop: "10px" }}>
-                  Rewards are cosmetic. Nothing to claim, nothing to sign.
-                </div>
               </div>
             )}
           </div>
