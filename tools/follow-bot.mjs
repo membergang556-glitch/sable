@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 const PROFILE = join(homedir(), "xprofile");
 const LOG = "following-log.txt";
-const MAX_UNFOLLOW = 20;
+const MAX_UNFOLLOW = 60;
 const DAILY_CAP = 100;
 
 // --- CLI args (no new dependencies) ---
